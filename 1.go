@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func main() {
+func mai1n() {
 	fmt.Println("asdasd")
 	fmt.Println("jajajajaja")
 	fmt.Print("wulauwuasla")
@@ -18,18 +18,18 @@ func main() {
 
 	fmt.Println("==================")
 
-	result,sum:=anomousFunc(myArray)
+	result, sum := anomousFunc(myArray)
 
 	fmt.Println(result)
 	fmt.Println(sum)
 }
 
-func anomousFunc(params []int) (results string,sum int) {
-	sum1:=0
-	result:=""
-	for	_,param := range(params){
-		sum1+=param
-		result+=strconv.Itoa(param)
+func anomousFunc(params []int) (results string, sum int) {
+	sum1 := 0
+	result := ""
+	for _, param := range params {
+		sum1 += param
+		result += strconv.Itoa(param)
 	}
 	results = result
 	sum = sum1
