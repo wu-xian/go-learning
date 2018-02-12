@@ -3,10 +3,10 @@ package main
 import "fmt"
 import "net/http"
 
-func main() {
+func main1() {
 	fmt.Printf("hello go")
 
-	var a int = 0
+	var a int
 
 	for a < 100 {
 		fmt.Printf("%d \n", a)
