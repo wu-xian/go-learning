@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func mai1n() {
+func main1() {
 	fmt.Println("asdasd")
 	fmt.Println("jajajajaja")
 	fmt.Print("wulauwuasla")
