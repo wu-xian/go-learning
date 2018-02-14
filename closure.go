@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main_1 {
+func main_1() {
 	fmt.Println("closure")
 
 	demoFunction2()
