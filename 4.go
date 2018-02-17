@@ -13,4 +13,8 @@ func main() {
 	fmt.Println("b", b)
 	fmt.Println("c", c)
 	fmt.Println("d", d)
+
+	maper1 := make(map[string]string)
+	maper1["talker"] = "balabalabala..."
+	fmt.Println(maper1["talker"])
 }
