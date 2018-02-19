@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func main() {
+func main4() {
 	var a int = 65
 	b := string(a)
 	c, _ := strconv.ParseInt("99", 10, 64)
@@ -16,5 +16,6 @@ func main() {
 
 	maper1 := make(map[string]string)
 	maper1["talker"] = "balabalabala..."
+
 	fmt.Println(maper1["talker"])
 }
