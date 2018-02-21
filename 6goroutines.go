@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func main6() {
 	go printString("what happened")
 
 	for i := 0; i < 10; i++ {
