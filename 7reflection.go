@@ -11,7 +11,7 @@ type man struct {
 	parent *man
 }
 
-func main() {
+func main7() {
 	var x int = 3
 	typeOf := reflect.TypeOf(x)
 	valueOf := reflect.ValueOf(x)
