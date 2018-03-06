@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func main() {
+func main4() {
 	var a int = 65
 	b := string(a)
 	c, _ := strconv.ParseInt("99", 10, 64)
