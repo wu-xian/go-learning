@@ -16,5 +16,6 @@ func main4() {
 
 	maper1 := make(map[string]string)
 	maper1["talker"] = "balabalabala..."
+
 	fmt.Println(maper1["talker"])
 }
