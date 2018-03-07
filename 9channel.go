@@ -4,9 +4,9 @@ import (
 	"fmt"
 )
 
-func main() {
+func main9() {
 	fmt.Println("9.channel")
-	interger := make(chan int)
+	interger := make(chan int, 2)
 
 	go readChan(interger)
 	fmt.Println("send channel before")
@@ -21,11 +21,14 @@ func main() {
 
 func readChan(ch chan int) {
 	var result int
+	var count int = 0
 	for {
 		result = <-ch
-		if result == 0 {
-			break
+		fmt.Println("read chan ", count, result)
+		count++
+		if result != 0 {
+			fmt.Println(result)
 		}
-		fmt.Println(result)
 	}
+	fmt.Println("gorutine is closed")
 }
