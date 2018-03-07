@@ -19,7 +19,7 @@ func main9() {
 	}
 }
 
-func readChan(ch chan int) {
+func readChan(ch <-chan int) {
 	var result int
 	var count int = 0
 	for {
