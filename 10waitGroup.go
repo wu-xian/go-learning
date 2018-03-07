@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func main() {
+func main10() {
 	waitGroup := new(sync.WaitGroup)
 	for i := 0; i < 3; i++ {
 		waitGroup.Add(i)
