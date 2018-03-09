@@ -7,7 +7,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func main() {
+func main11() {
 	app := cli.NewApp()
 	app.Action = action
 	app.Version = "0.0.1"
