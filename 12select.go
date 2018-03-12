@@ -7,7 +7,7 @@ import (
 
 var i = 0
 
-func main() {
+func main12() {
 	ch1 := make(chan string)
 	//ch2 := make(chan string)
 
