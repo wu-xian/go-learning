@@ -14,7 +14,7 @@ type test struct {
 	Value string `xorm:"'Value'"`
 }
 
-func main() {
+func main13() {
 	engine, err := xorm.NewEngine("mysql", "root:1234@tcp(192.168.1.199:3306)/test")
 	if err != nil {
 		fmt.Println(err)
@@ -52,11 +52,10 @@ func main() {
 		Value: "993333333339",
 	}
 	sess := engine.NewSession()
+	defer sess.Close()
 	tts := []test{t1, t2, t3}
 	for _, _t := range tts {
 		sess.Insert(_t)
 	}
 	sess.Commit()
-	defer sess.Close()
->>>>>>> d42bc28a14e9e126652bfa372480008e6aa50a5c
 }
