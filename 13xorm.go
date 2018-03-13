@@ -4,36 +4,59 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+
 	xorm "github.com/go-xorm/xorm"
 )
 
-type user struct {
-	Id       string `xorm:"'Id'"`
-	UserName string `xorm:"'UserName'`
-	Password string `xorm:"'Password'`
-	RealName string `xorm:"'RealName'`
+type test struct {
+	Id    int64  `xorm:"'Id'"`
+	Name  string `xorm:"'Name'"`
+	Value string `xorm:"'Value'"`
 }
 
-func main13() {
-	fmt.Println("13")
-	engine, err := xorm.NewEngine("mysql", "root:wuxian@/lamp")
+func main() {
+	engine, err := xorm.NewEngine("mysql", "root:1234@tcp(192.168.1.199:3306)/test")
 	if err != nil {
 		fmt.Println(err)
-	}
-	var users = make([]*user, 0)
-	//user.Id = "7efe47a5-4083-4e83-b019-8bd3f053ff24"
-	err = engine.Table("user").Select("user.Id,user.UserName,user.Password,user.RealName").Cols("Id", "UserName", "Password", "RealName").Find(&users)
-	// sess, _ := engine.Query(`select
-	// 		user.Id as Id,
-	// 		user.UserName as UserName,
-	// 		user.Password as Password,
-	// 		user.RealName as RealName
-	// 	 from user`).Cols("").Find(&users)
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, user := range users {
-		fmt.Println(user.Id, "|", user.UserName, "|", user.Password, "|", user.RealName)
 	}
 
+	t := test{}
+	t.Id = 1
+	result, err := engine.Table("test").Get(&t)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(result)
+	fmt.Println(t)
+
+	//ts := make([]*test, 0)
+	var ts []test
+	engine.Find(&ts)
+	for _, t1 := range ts {
+		fmt.Println("#", t1)
+	}
+
+	t1 := test{
+		Id:    0,
+		Name:  "asd",
+		Value: "999",
+	}
+	t2 := test{
+		Id:    0,
+		Name:  "2222222",
+		Value: "9222222222222222222299",
+	}
+	t3 := test{
+		Id:    0,
+		Name:  "33333333333333",
+		Value: "993333333339",
+	}
+	sess := engine.NewSession()
+	tts := []test{t1, t2, t3}
+	for _, _t := range tts {
+		sess.Insert(_t)
+	}
+	sess.Commit()
+	defer sess.Close()
+>>>>>>> d42bc28a14e9e126652bfa372480008e6aa50a5c
 }
