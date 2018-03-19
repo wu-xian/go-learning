@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func main() {
+func main14() {
 	fmt.Println("go web!")
 	http.HandleFunc("/", processRequest)
 	err := http.ListenAndServe(":9090", nil)
@@ -16,4 +16,5 @@ func main() {
 
 func processRequest(response http.ResponseWriter, request *http.Request) {
 	fmt.Println("start request")
+	fmt.Fprint(response, "this is root")
 }

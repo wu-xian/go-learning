@@ -9,7 +9,7 @@ import (
 
 func main11() {
 	app := cli.NewApp()
-	app.Action = action
+	app.Action = action1
 	app.Version = "0.0.1"
 	app.UsageText = "My Test Cli Project"
 	app.Authors = []cli.Author{}
@@ -17,7 +17,7 @@ func main11() {
 		Name:      "run",
 		ShortName: "r",
 		Usage:     "For test",
-		Action:    action,
+		Action:    action1,
 		HelpName:  "help",
 	}
 	app.Commands = []cli.Command{
@@ -26,6 +26,6 @@ func main11() {
 	app.Run(os.Args)
 }
 
-func action(ctx *cli.Context) {
+func action1(ctx *cli.Context) {
 	fmt.Println("start")
 }
