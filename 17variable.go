@@ -14,7 +14,7 @@ func main() {
 	var x X = "hello"
 	fmt.Println(x)
 	var action1 action = func(msg string, i int) { fmt.Println("in sub func", msg, i) }
-	action1("hey", 23)
+	action1("hey")
 	Message = "message!!!!"
 	fmt.Println(Message)
 }
