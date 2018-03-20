@@ -17,6 +17,7 @@ func main14() {
 
 func processRequest(response http.ResponseWriter, request *http.Request) {
 	fmt.Println("start request")
+	fmt.Fprint(response, "this is root")
 }
 
 func processRequestHello(r http.ResponseWriter, req *http.Request) {
