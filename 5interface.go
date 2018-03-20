@@ -6,7 +6,7 @@ import (
 
 type human interface {
 	sleep() bool
-	jerkoff() bool
+	change() bool
 	showSelf()
 }
 
@@ -19,7 +19,7 @@ func (wu wuxian) sleep() bool {
 	return wu.cnt > 10
 }
 
-func (wu wuxian) jerkoff() bool {
+func (wu wuxian) change() bool {
 	return wu.name == "smoker"
 }
 
@@ -33,7 +33,7 @@ func showItByInterface(hu human) {
 	//fmt.Println("in sub function", wu.cnt)
 	//fmt.Println("in sub function", )
 	hu.showSelf()
-	fmt.Println("jerkoff:", hu.jerkoff())
+	fmt.Println("change:", hu.change())
 }
 
 func main5() {

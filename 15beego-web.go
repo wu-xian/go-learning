@@ -22,7 +22,7 @@ func (this CaseController) Get() {
 	this.Ctx.WriteString("Case.Get")
 }
 
-func main() {
+func main15() {
 	beego.Router("/home", &HomeController{})
 
 	ns := beego.NewNamespace("/group",

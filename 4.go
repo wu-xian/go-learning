@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func main4() {
@@ -17,5 +18,10 @@ func main4() {
 	maper1 := make(map[string]string)
 	maper1["talker"] = "balabalabala..."
 
+	ss := "http://localhost:9090"
+	idx := strings.LastIndex(ss, ":")
+	fmt.Println(idx)
+	fmt.Println(ss[:idx])
+	fmt.Println(ss[idx:])
 	fmt.Println(maper1["talker"])
 }
