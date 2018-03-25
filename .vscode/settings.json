@@ -1,4 +1,6 @@
 {
+    
+    
     // Go configuration
     // Run 'go build'/'go test -c' on save.
     "go.buildOnSave": true,

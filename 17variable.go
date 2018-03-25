@@ -10,7 +10,7 @@ type action func(message string, integer int, f1 func(string))
 
 var Message string
 
-func main() {
+func main17() {
 	var x X = "hello"
 	fmt.Println(x)
 	f2 := func(s string) {
