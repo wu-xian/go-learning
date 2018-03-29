@@ -13,30 +13,23 @@ type User struct {
 }
 
 func main() {
+	tmpName := "tmpl/template-learning.tmpl"
 	fmt.Println("18 template")
-	t := template.New("name123")
-	t, err := t.ParseFiles("tmpl/template-learning.tmpl")
-
+	t, err := template.New(tmpName).ParseFiles("tmpl/template-learning.tmpl")
 	if err != nil {
 		fmt.Println(err)
 	}
-	// user3 := User{
-	// 	Id:   3,
-	// 	Name: "wuxian",
-	// 	//RelatedUsers: nil,
-	// }
-
-	// user4 := User{
-	// 	Id:   4,
-	// 	Name: "wuxian",
-	// 	//RelatedUsers: nil,
-	// }
 	user := User{
 		Id:   1,
-		Name: "wuxian",
+		Name: "123",
 		//RelatedUsers: []User{user3, user4},
 	}
-	if err = t.ExecuteTemplate(os.Stdout, "name123", user); err != nil {
+	// if err = t.ExecuteTemplate(os.Stdout, tmpName, user); err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	err = t.Execute(os.Stdout, user)
+	if err != nil {
 		fmt.Println(err)
 	}
 }
