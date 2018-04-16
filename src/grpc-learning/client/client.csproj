@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\grpc\grpc.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Grpc.Core" Version="1.10.1"/>
+    <PackageReference Include="Google.Protobuf" Version="3.5.1"/>
+  </ItemGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+</Project>
