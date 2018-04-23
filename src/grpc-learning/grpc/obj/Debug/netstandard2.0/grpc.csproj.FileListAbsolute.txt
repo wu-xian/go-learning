@@ -6,3 +6,11 @@ F:\test\grpc-learning\src\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfoInputs.
 F:\test\grpc-learning\src\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfo.cs
 F:\test\grpc-learning\src\grpc\obj\Debug\netstandard2.0\grpc.dll
 F:\test\grpc-learning\src\grpc\obj\Debug\netstandard2.0\grpc.pdb
+D:\2golang\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.deps.json
+D:\2golang\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.dll
+D:\2golang\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.pdb
+D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.csproj.CoreCompileInputs.cache
+D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfoInputs.cache
+D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfo.cs
+D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.dll
+D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.pdb

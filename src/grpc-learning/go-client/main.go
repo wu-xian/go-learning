@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-client/grpcg"
+	"learn/src/grpc-learning/go-client/grpcg"
 	"time"
 
 	"golang.org/x/net/context"

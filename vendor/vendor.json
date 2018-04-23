@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "wuhAtS1cxvrYJspfqcll0r4Y2/c=",
+			"path": "github.com/ttacon/termui",
+			"revision": "193b3c63a3254b7dace874bd0b2a5b6f230df2fe",
+			"revisionTime": "2018-03-28T00:46:43Z"
+		}
+	],
+	"rootPath": "learn"
+}
