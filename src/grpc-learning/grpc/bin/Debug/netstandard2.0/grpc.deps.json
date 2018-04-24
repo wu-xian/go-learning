@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v2.0/",
-    "signature": "e26ab5d2a0bf352c21f86194f5095cccd3f94713"
+    "signature": "bd78d850542c79490b0b1099f811becde9839e5f"
   },
   "compilationOptions": {},
   "targets": {
@@ -12,7 +12,7 @@
           "Google.Protobuf": "3.5.1",
           "Grpc.Core": "1.10.1",
           "Grpc.Tools": "1.10.1",
-          "NETStandard.Library": "2.0.1"
+          "NETStandard.Library": "2.0.0"
         },
         "runtime": {
           "grpc.dll": {}
@@ -20,7 +20,7 @@
       },
       "Google.Protobuf/3.5.1": {
         "dependencies": {
-          "NETStandard.Library": "2.0.1"
+          "NETStandard.Library": "2.0.0"
         },
         "runtime": {
           "lib/netstandard1.0/Google.Protobuf.dll": {}
@@ -28,7 +28,7 @@
       },
       "Grpc.Core/1.10.1": {
         "dependencies": {
-          "NETStandard.Library": "2.0.1",
+          "NETStandard.Library": "2.0.0",
           "System.Interactive.Async": "3.1.1",
           "System.Runtime.Loader": "4.0.0",
           "System.Threading.Thread": "4.0.0",
@@ -41,14 +41,14 @@
       "Grpc.Tools/1.10.1": {},
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NETCore.Targets/1.0.1": {},
-      "NETStandard.Library/2.0.1": {
+      "NETStandard.Library/2.0.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0"
         }
       },
       "System.Interactive.Async/3.1.1": {
         "dependencies": {
-          "NETStandard.Library": "2.0.1"
+          "NETStandard.Library": "2.0.0"
         },
         "runtime": {
           "lib/netstandard1.3/System.Interactive.Async.dll": {}
@@ -176,12 +176,12 @@
       "path": "microsoft.netcore.targets/1.0.1",
       "hashPath": "microsoft.netcore.targets.1.0.1.nupkg.sha512"
     },
-    "NETStandard.Library/2.0.1": {
+    "NETStandard.Library/2.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-oA6nwv9MhEKYvLpjZ0ggSpb1g4CQViDVQjLUcDWg598jtvJbpfeP2reqwI1GLW2TbxC/Ml7xL6BBR1HmKPXlTg==",
-      "path": "netstandard.library/2.0.1",
-      "hashPath": "netstandard.library.2.0.1.nupkg.sha512"
+      "sha512": "sha512-LASRiMgdSM/JuAnvYktrtdehjks+FD4BT2RdBo4lebHR+D/3UdPxNGJy2mzt+FGRryb+9w5sgHoroeaBKyiICQ==",
+      "path": "netstandard.library/2.0.0",
+      "hashPath": "netstandard.library.2.0.0.nupkg.sha512"
     },
     "System.Interactive.Async/3.1.1": {
       "type": "package",

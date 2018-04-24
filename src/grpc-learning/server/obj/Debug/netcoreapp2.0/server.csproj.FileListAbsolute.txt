@@ -23,3 +23,15 @@ D:\2golang\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.Ass
 D:\2golang\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.csproj.CopyComplete
 D:\2golang\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.dll
 D:\2golang\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.pdb
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\server.deps.json
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\server.runtimeconfig.json
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\server.runtimeconfig.dev.json
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\server.dll
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\server.pdb
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\grpc.dll
+c:\tools\GoPath\src\learn\src\grpc-learning\server\bin\Debug\netcoreapp2.0\grpc.pdb
+c:\tools\GoPath\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.csproj.CoreCompileInputs.cache
+c:\tools\GoPath\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.AssemblyInfoInputs.cache
+c:\tools\GoPath\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.AssemblyInfo.cs
+c:\tools\GoPath\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.dll
+c:\tools\GoPath\src\learn\src\grpc-learning\server\obj\Debug\netcoreapp2.0\server.pdb

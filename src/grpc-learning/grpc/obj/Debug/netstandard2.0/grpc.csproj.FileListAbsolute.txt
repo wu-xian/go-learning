@@ -14,3 +14,11 @@ D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.Assemb
 D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfo.cs
 D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.dll
 D:\2golang\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.pdb
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.deps.json
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.dll
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\bin\Debug\netstandard2.0\grpc.pdb
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.csproj.CoreCompileInputs.cache
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfoInputs.cache
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.AssemblyInfo.cs
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.dll
+c:\tools\GoPath\src\learn\src\grpc-learning\grpc\obj\Debug\netstandard2.0\grpc.pdb
