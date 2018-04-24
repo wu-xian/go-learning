@@ -13,4 +13,6 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 bin/Debug
-src/grpc-learning/grpc/obj/
+obj/
+src/grpc-learning/grpc/bin/Debug/
+src/grpc-learning/server/bin/Debug/
