@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "vBH0XzHZhFYooVKg+junrTeAfFY=",
+			"path": "github.com/astaxie/beego/logs",
+			"revision": "f16688817aa428d10361394015b40d096b680542",
+			"revisionTime": "2017-12-18T11:18:59Z"
+		},
+		{
 			"checksumSHA1": "zFv0xWYC94gU6aClN7LlZF5EaAs=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "1a676ac6e4dce68e9303a1800773861350374a9e",
@@ -25,6 +31,12 @@
 			"path": "github.com/go-xorm/xorm",
 			"revision": "11743c1a80897b0fdbf79d88ebcaa7dd5f9d3cf3",
 			"revisionTime": "2018-03-08T01:30:38Z"
+		},
+		{
+			"checksumSHA1": "Y27Agdpf4FN4HGANJ8cp8+Q6VO4=",
+			"path": "github.com/golang/glog",
+			"revision": "23def4e6c14b4da8ac2ed8007337bc5eb5007998",
+			"revisionTime": "2016-01-25T20:49:56Z"
 		},
 		{
 			"checksumSHA1": "du6NkYFlK2UnPki8fQIs7NXrkIE=",

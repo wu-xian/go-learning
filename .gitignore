@@ -16,3 +16,4 @@ bin/Debug
 obj/
 src/grpc-learning/grpc/bin/Debug/
 src/grpc-learning/server/bin/Debug/
+src/glog-learning/test.log
