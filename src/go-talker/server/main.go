@@ -32,4 +32,7 @@ func startAction(ctx cli.Context) {
 	if err != nil {
 		panic(err)
 	}
+	for {
+
+	}
 }
