@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"time"
 	"os"
 
 	"net"
@@ -9,6 +11,16 @@ import (
 )
 
 const VERSION = "0.0.1"
+
+type Message struct{
+	Content string
+	Time uint64
+}
+
+type Client struct{
+	Name string
+	Connection net.Conn
+}
 
 func main() {
 	app := cli.NewApp()
@@ -32,4 +44,12 @@ func startAction(ctx cli.Context) {
 	if err != nil {
 		panic(err)
 	}
+	for {
+		conn, err := listener.Accept()
+		//conn.
+	}
+}
+
+func MessageToBytes(msg Message) (byte[],error){
+	bytes.
 }
