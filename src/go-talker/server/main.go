@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"bytes"
 	"time"
 	"os"
@@ -51,5 +52,20 @@ func startAction(ctx cli.Context) {
 }
 
 func MessageToBytes(msg Message) (byte[],error){
-	bytes.
+	buf := &bytes.Buffer{}
+	err := binary.Write(buf,binary.BigEndian,&msg)
+	if err!= nil{
+		return _,err
+	}
+	return buf.Bytes()
+}
+
+func BytesToMessage(bytess []byte) (Message,error){
+	msg := &Message{}
+	buf := bytess.Buffer
+err:=	binary.Read(buf,binary.BigEndian,&msg)
+if err!= nil{
+	return  _,err
+}
+return msg;
 }
