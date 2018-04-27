@@ -19,7 +19,7 @@ var (
 	Port       int
 	UName      string
 	Key        string
-	connection net.Conn
+	connection *net.TCPConn
 	stopIt     chan os.Signal = make(chan os.Signal, 1)
 )
 
@@ -34,23 +34,23 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	serverAddress := &net.TCPAddr{
-		IP:   net.ParseIP(IP),
-		Port: Port,
-	}
+	// serverAddress := &net.TCPAddr{
+	// 	IP:   net.ParseIP(IP),
+	// 	Port: Port,
+	// }
 	dialer := net.Dialer{
 		Timeout: time.Duration(5) * time.Second,
 	}
 	conn, err := dialer.Dial("tcp", IP+":"+strconv.Itoa(Port))
-	connection = conn.(net.TCPConn)
+	connection = conn.(*net.TCPConn)
 	defer connection.Close()
 	fmt.Println("has been connected to the server...")
 	if err != nil {
 		fmt.Println("unable to connect to the server : %s:%d", IP, Port)
 	}
 
-	go MessagePublisher(&connection)
-	go MessagePublisher(&connection)
+	go MessageReceiver(connection)
+	go MessagePublisher(connection)
 
 	go func() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
@@ -66,12 +66,12 @@ func MessageReceiver(conn *net.TCPConn) {
 		_, err := conn.Read(bytes)
 		if err != nil {
 			fmt.Println("unable to read message", err)
-			continue
+			return
 		}
 		message, err := BytesToMessage(bytes)
 		if err != nil {
-			fmt.Println("invalid message")
-			continue
+			fmt.Println("invalid message:", err)
+			return
 		}
 		fmt.Println(message.Content)
 	}
@@ -80,14 +80,17 @@ func MessageReceiver(conn *net.TCPConn) {
 func MessagePublisher(conn *net.TCPConn) {
 	content := ""
 	for {
-		fmt.Scanln(content)
-		message := Message{
+		_, err := fmt.Scanln(&content)
+		if err != nil {
+			fmt.Println("errors:", err)
+			return
+		}
+		message := &Message{
 			Content: content,
 			Time:    time.Now(),
 		}
-		bytess, err := MessageToBytes(&message)
+		bytess, err := MessageToBytes(message)
 		if err != nil {
-			fmt.Println(err)
 			return
 		}
 		_, err = conn.Write(bytess)
@@ -98,14 +101,11 @@ func MessagePublisher(conn *net.TCPConn) {
 	}
 }
 
-func MessageFormatter(uname, content string) string {
-	return fmt.Sprintf("[%s]:%s", uname, content)
-}
-
 func MessageToBytes(msg *Message) ([]byte, error) {
-	buf := &bytes.Buffer{}
-	err := binary.Write(buf, binary.BigEndian, &msg)
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.BigEndian, msg)
 	if err != nil {
+		fmt.Println("message to bytes ：", err)
 		return nil, err
 	}
 	return buf.Bytes(), nil

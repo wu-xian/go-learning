@@ -85,6 +85,7 @@ func startAction(ctx *cli.Context) {
 	go func(_listener net.Listener) {
 		for {
 			conn, err := _listener.Accept()
+			fmt.Println("open connection:", conn.RemoteAddr())
 			go func(_conn net.Conn) {
 				if err != nil {
 					logger.Info("connection failure , ", _conn.RemoteAddr, err)
@@ -154,6 +155,7 @@ func MessageDelivery(client Client) {
 			return
 		}
 		message, err := BytesToMessage(bytess[:count])
+		fmt.Println("get message:", message)
 		if err != nil {
 			logger.Info("can not read bytes from client", err)
 			client.Connection.Close()
@@ -188,7 +190,7 @@ func MessageFormatter(uname, content string) string {
 
 func MessageToBytes(msg *Message) ([]byte, error) {
 	buf := &bytes.Buffer{}
-	err := binary.Write(buf, binary.BigEndian, &msg)
+	err := binary.Write(buf, binary.BigEndian, *msg)
 	if err != nil {
 		return nil, err
 	}

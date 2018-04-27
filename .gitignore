@@ -18,3 +18,4 @@ src/grpc-learning/grpc/bin/Debug/
 src/grpc-learning/server/bin/Debug/
 src/glog-learning/test.log
 src/go-talker/server/test.log
+debug
