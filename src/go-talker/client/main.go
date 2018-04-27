@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	"gopkg.in/ini.v1"
 )
@@ -23,7 +24,7 @@ var (
 
 type Message struct {
 	Content string
-	Time    uint64
+	Time    time.Time
 }
 
 func main() {
@@ -36,12 +37,18 @@ func main() {
 		IP:   net.ParseIP(IP),
 		Port: Port,
 	}
-	connection, err := net.DialTCP("tcp", nil, serverAddress)
+	dialer := net.Dialer{
+		Timeout: time.Now().Add(time.Duration(5) * time.Second),
+	}
+	connection, err := dialer.Dial("tcp", nil, serverAddress)
 	defer connection.Close()
 	fmt.Println("has been connected to the server...")
 	if err != nil {
 		fmt.Println("unable to connect to the server : %s:%d", IP, Port)
 	}
+
+	go MessagePublisher(connection)
+	go MessagePublisher(connection)
 
 	go func() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
@@ -69,7 +76,24 @@ func MessageReceiver(conn *net.TCPConn) {
 }
 
 func MessagePublisher(conn *net.TCPConn) {
-
+	content := ""
+	for {
+		fmt.Scanln(content)
+		message := Message{
+			Content: content,
+			Time:    time.Now(),
+		}
+		bytess, err := MessageToBytes(&message)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = conn.Write(bytess)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 }
 
 func MessageFormatter(uname, content string) string {
@@ -103,7 +127,7 @@ func Init() error {
 	}
 	serverSection := cfg.Section("server")
 	IP = serverSection.Key("ip").String()
-	Port, err := serverSection.Key("port").Int()
+	Port, err = serverSection.Key("port").Int()
 	if err != nil {
 		return errors.New("failure to load config : server.port")
 	}
