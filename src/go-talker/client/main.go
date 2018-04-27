@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"gopkg.in/ini.v1"
@@ -38,17 +39,18 @@ func main() {
 		Port: Port,
 	}
 	dialer := net.Dialer{
-		Timeout: time.Now().Add(time.Duration(5) * time.Second),
+		Timeout: time.Duration(5) * time.Second,
 	}
-	connection, err := dialer.Dial("tcp", nil, serverAddress)
+	conn, err := dialer.Dial("tcp", IP+":"+strconv.Itoa(Port))
+	connection = conn.(net.TCPConn)
 	defer connection.Close()
 	fmt.Println("has been connected to the server...")
 	if err != nil {
 		fmt.Println("unable to connect to the server : %s:%d", IP, Port)
 	}
 
-	go MessagePublisher(connection)
-	go MessagePublisher(connection)
+	go MessagePublisher(&connection)
+	go MessagePublisher(&connection)
 
 	go func() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
