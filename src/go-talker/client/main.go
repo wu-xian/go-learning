@@ -85,7 +85,7 @@ func MessagePublisher(conn *net.TCPConn) {
 			fmt.Println("errors:", err)
 			return
 		}
-		message := &Message{
+		message := Message{
 			Content: content,
 			Time:    time.Now(),
 		}
@@ -101,7 +101,7 @@ func MessagePublisher(conn *net.TCPConn) {
 	}
 }
 
-func MessageToBytes(msg *Message) ([]byte, error) {
+func MessageToBytes(msg Message) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, msg)
 	if err != nil {
@@ -111,13 +111,13 @@ func MessageToBytes(msg *Message) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func BytesToMessage(bytess []byte) (*Message, error) {
-	msg := &Message{}
+func BytesToMessage(bytess []byte) (Message, error) {
+	msg := Message{}
 	buf := &bytes.Buffer{}
 	buf.Read(bytess)
 	err := binary.Read(buf, binary.BigEndian, msg)
 	if err != nil {
-		return nil, err
+		return msg, err
 	}
 	return msg, nil
 }

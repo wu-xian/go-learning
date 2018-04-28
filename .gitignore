@@ -19,3 +19,5 @@ src/grpc-learning/server/bin/Debug/
 src/glog-learning/test.log
 src/go-talker/server/test.log
 debug
+src/go-talker/server/test.2018-04-27.log
+src/go-talker/server/test.2018-04-27.log
