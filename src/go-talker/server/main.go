@@ -1,38 +1,35 @@
 package main
 
 import (
-	"bytes"
-	"encoding/binary"
-	"errors"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
-	"strings"
+	"strconv"
 	"sync"
-	"time"
+
+	"learn/src/go-talker/log"
+
+	"learn/src/go-talker/proto"
 
 	"github.com/astaxie/beego/logs"
 	cli "github.com/urfave/cli"
 )
 
 var (
-	logger *logs.BeeLogger
-	stopIt chan os.Signal = make(chan os.Signal, 1)
-	port   string         = ":34567"
-	pool   *ConnectionPool
+	logger            *logs.BeeLogger
+	stopIt            chan os.Signal = make(chan os.Signal, 1)
+	port              string         = ":34567"
+	pool              *ConnectionPool
+	clientIndex       uint8 = 1
+	clientIndexLocker sync.Mutex
 )
 
 const VERSION = "0.0.1"
 
-type Message struct {
-	Content string
-	Time    uint64
-}
-
 type Client struct {
-	Name       string
-	Connection net.Conn
+	Id         uint8
+	Connection *net.TCPConn
 	Address    net.Addr
 }
 
@@ -50,9 +47,9 @@ func (self *ConnectionPool) Insert(client Client) {
 func (self *ConnectionPool) Remove(client Client) {
 	self.Locker.Lock()
 	for i := 0; i < len(self.Clients); i++ {
-		if self.Clients[i].Name == client.Name {
+		self.Clients[i].Connection.Write([]byte("client" + strconv.Itoa(int(self.Clients[i].Id))))
+		if self.Clients[i].Id == client.Id {
 			self.Clients = append(self.Clients[:i], self.Clients[i+1:]...)
-			break
 		}
 	}
 	self.Locker.Unlock()
@@ -84,52 +81,24 @@ func startAction(ctx *cli.Context) {
 	defer listener.Close()
 	go func(_listener net.Listener) {
 		for {
-			conn, err := _listener.Accept()
+			rawConn, _ := _listener.Accept()
+			conn := rawConn.(*net.TCPConn)
 			fmt.Println("open connection:", conn.RemoteAddr())
-			go func(_conn net.Conn) {
-				if err != nil {
-					logger.Info("connection failure , ", _conn.RemoteAddr, err)
-					return
-				}
-				err = _conn.SetReadDeadline(time.Now().Add(time.Duration(5) * time.Second))
-				if err != nil {
-					logger.Info("connection timeout", _conn.RemoteAddr, err)
-					_conn.Close()
-					return
-				}
-				bytess := make([]byte, 2048)
-				count, err := _conn.Read(bytess)
-				if err != nil {
-					logger.Info("read bytes", _conn.RemoteAddr, err)
-					_conn.Close()
-					return
-				}
-				if count > 2048 {
-					logger.Info("message size too big", _conn.RemoteAddr, err)
-					_conn.Close()
-					return
-				}
-				firstMsg, err := BytesToMessage(bytess)
-				if err != nil || firstMsg == nil {
-					logger.Info("fist message is wrong", _conn.RemoteAddr, err)
-					_conn.Close()
-					return
-				}
-				logger.Info("get first message", firstMsg)
-				uname, err := AuthCheck(firstMsg)
-				if err != nil {
-					logger.Info(err.Error() + ";" + uname)
-					_conn.Close()
-					return
-				}
+			go func(_conn *net.TCPConn) {
+
+				clientIndexLocker.Lock()
+
 				client := Client{
 					Address:    _conn.RemoteAddr(),
 					Connection: _conn,
-					Name:       uname,
+					Id:         clientIndex,
 				}
+				clientIndex++
+				clientIndexLocker.Unlock()
 				pool.Insert(client)
 
 				//broadcast
+				MessageDelivery(client)
 			}(conn)
 		}
 	}(listener)
@@ -145,26 +114,35 @@ func startAction(ctx *cli.Context) {
 }
 
 func MessageDelivery(client Client) {
-	bytess := make([]byte, 0)
+	bytess := make([]byte, 20480)
 	for {
 		count, err := client.Connection.Read(bytess)
-		if err != nil || count == 0 {
+		//client.Connection.CloseRead()
+		log.Logger.Info("get bytes from client ", bytess[:count])
+		if err != nil {
 			logger.Info("read bytes :", err)
+			logger.Info("close connection", client.Id)
 			client.Connection.Close()
 			pool.Remove(client)
 			return
 		}
-		message, err := BytesToMessage(bytess[:count])
-		fmt.Println("get message:", message)
+		message, err := proto.BytesToMessage(bytess[:count])
+		logger.Info("get bytes from client", message)
 		if err != nil {
 			logger.Info("can not read bytes from client", err)
 			client.Connection.Close()
 			pool.Remove(client)
 			return
 		}
-		formattedMessage := MessageFormatter(client.Name, message.Content)
+		if len(message.Name) == 0 {
+			logger.Info("client name is empty")
+			client.Connection.Close()
+			pool.Remove(client)
+			return
+		}
+		formattedMessage := MessageFormatter(message.Name, message.Content)
 		message.Content = formattedMessage
-		messageBytes, err := MessageToBytes(message)
+		messageBytes, err := proto.MessageToBytes(message)
 		if err != nil {
 			client.Connection.Close()
 			pool.Remove(client)
@@ -173,10 +151,11 @@ func MessageDelivery(client Client) {
 		pool.Locker.Lock()
 		for i := 0; i < len(pool.Clients); i++ {
 			currentClient := pool.Clients[i]
-			if currentClient.Name == client.Name {
+			if currentClient.Id == client.Id {
 				continue
 			}
 			currentClient.Connection.Write(messageBytes)
+			//currentClient.Connection.CloseWrite()
 		}
 		pool.Locker.Unlock()
 	}
@@ -188,49 +167,12 @@ func MessageFormatter(uname, content string) string {
 	return fmt.Sprintf("[%s]:%s", uname, content)
 }
 
-func MessageToBytes(msg *Message) ([]byte, error) {
-	buf := &bytes.Buffer{}
-	err := binary.Write(buf, binary.BigEndian, *msg)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func BytesToMessage(bytess []byte) (*Message, error) {
-	msg := &Message{}
-	buf := &bytes.Buffer{}
-	buf.Read(bytess)
-	err := binary.Read(buf, binary.BigEndian, msg)
-	if err != nil {
-		return nil, err
-	}
-	return msg, nil
-}
-
-func AuthCheck(msg *Message) (string, error) {
-	s := strings.Split(msg.Content, "\\n")
-	if len(s) != 2 {
-		return "", errors.New("wrong message type")
-	}
-	uName := s[0]
-	uKey := s[1]
-	if uName == "wu-xian" && uKey == "123" {
-		return "wu-xian", nil
-	}
-	return "", errors.New("Authentiaction failure")
-}
-
 func Init() {
 	InitConnectionPool()
-	InitLogger()
+	log.InitLogger()
+	logger = log.Logger
 }
 
 func InitConnectionPool() {
 	pool = &ConnectionPool{}
-}
-
-func InitLogger() {
-	logger = logs.NewLogger(1000)
-	logger.SetLogger("file", `{"filename":"test.log"}`)
 }

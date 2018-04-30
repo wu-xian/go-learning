@@ -9,7 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceRoot}/src/go-talker/client"
+            "program": "${workspaceRoot}/src/go-talker/server",
+            "externalConsole": true
         },
         {
             "name": "Go.Run",

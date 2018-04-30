@@ -1,0 +1,10 @@
+
+syntax = "proto3";
+
+package proto;
+
+message Message{
+    string Content = 1;
+    string Name = 2;
+    int64 Time     =3;
+}

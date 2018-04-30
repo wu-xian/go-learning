@@ -1,15 +1,16 @@
 package main
 
 import (
-	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
+	"learn/src/go-talker/proto"
 	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"time"
+
+	"learn/src/go-talker/log"
 
 	"gopkg.in/ini.v1"
 )
@@ -23,32 +24,22 @@ var (
 	stopIt     chan os.Signal = make(chan os.Signal, 1)
 )
 
-type Message struct {
-	Content string
-	Time    time.Time
-}
-
 func main() {
 	err := Init()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	// serverAddress := &net.TCPAddr{
-	// 	IP:   net.ParseIP(IP),
-	// 	Port: Port,
-	// }
 	dialer := net.Dialer{
 		Timeout: time.Duration(5) * time.Second,
 	}
 	conn, err := dialer.Dial("tcp", IP+":"+strconv.Itoa(Port))
 	connection = conn.(*net.TCPConn)
 	defer connection.Close()
-	fmt.Println("has been connected to the server...")
+	log.Logger.Info("has been connected to the server...")
 	if err != nil {
-		fmt.Println("unable to connect to the server : %s:%d", IP, Port)
+		log.Logger.Info("unable to connect to the server : %s:%d", IP, Port)
 	}
-
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
@@ -57,20 +48,22 @@ func main() {
 	}()
 
 	_ = <-stopIt
+	connection.CloseRead()
 	fmt.Println("application stopped")
 }
 
 func MessageReceiver(conn *net.TCPConn) {
 	for {
-		bytes := []byte{}
-		_, err := conn.Read(bytes)
+		bytes := make([]byte, 20480)
+		count, err := conn.Read(bytes)
+		//conn.CloseRead()
 		if err != nil {
-			fmt.Println("unable to read message", err)
+			log.Logger.Info("unable to read message", err)
 			return
 		}
-		message, err := BytesToMessage(bytes)
+		message, err := proto.BytesToMessage(bytes[:count])
 		if err != nil {
-			fmt.Println("invalid message:", err)
+			log.Logger.Info("invalid message:", err)
 			return
 		}
 		fmt.Println(message.Content)
@@ -85,15 +78,18 @@ func MessagePublisher(conn *net.TCPConn) {
 			fmt.Println("errors:", err)
 			return
 		}
-		message := Message{
+		message := proto.Message{
 			Content: content,
-			Time:    time.Now(),
+			Name:    UName,
+			Time:    time.Now().Unix(),
 		}
-		bytess, err := MessageToBytes(message)
+		bytess, err := proto.MessageToBytes(&message)
+		log.Logger.Info("get bytes ", bytess)
 		if err != nil {
 			return
 		}
 		_, err = conn.Write(bytess)
+		//err = conn.CloseWrite()
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -101,28 +97,8 @@ func MessagePublisher(conn *net.TCPConn) {
 	}
 }
 
-func MessageToBytes(msg Message) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, msg)
-	if err != nil {
-		fmt.Println("message to bytes ：", err)
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func BytesToMessage(bytess []byte) (Message, error) {
-	msg := Message{}
-	buf := &bytes.Buffer{}
-	buf.Read(bytess)
-	err := binary.Read(buf, binary.BigEndian, msg)
-	if err != nil {
-		return msg, err
-	}
-	return msg, nil
-}
-
 func Init() error {
+	log.InitLogger()
 	cfg, err := ini.Load("talker.conf")
 	if err != nil {
 		return errors.New("failure to load config file:talker.conf")
@@ -134,7 +110,10 @@ func Init() error {
 		return errors.New("failure to load config : server.port")
 	}
 	clientSection := cfg.Section("client")
-	UName = clientSection.Key("uname").String()
+	UName = clientSection.Key("name").String()
+	if UName == "" {
+		panic("name is empty")
+	}
 	Key = clientSection.Key("key").String()
 	return nil
 }
