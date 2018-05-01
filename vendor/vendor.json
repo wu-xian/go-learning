@@ -9,6 +9,18 @@
 			"revisionTime": "2017-12-18T11:18:59Z"
 		},
 		{
+			"checksumSHA1": "q7BU3GitaKLTNUCn70KY3TF9NKU=",
+			"path": "github.com/cjbassi/drawille-go",
+			"revision": "ad535d0f92cd951308cdb80675e05c62c6b8b296",
+			"revisionTime": "2018-02-12T06:14:28Z"
+		},
+		{
+			"checksumSHA1": "OLPA0Q8Rg5LYMddux054RvUQUTM=",
+			"path": "github.com/cjbassi/termui",
+			"revision": "75525ee19c41f52324024b7a2bf31edcd1428494",
+			"revisionTime": "2018-04-22T03:57:04Z"
+		},
+		{
 			"checksumSHA1": "zFv0xWYC94gU6aClN7LlZF5EaAs=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "1a676ac6e4dce68e9303a1800773861350374a9e",

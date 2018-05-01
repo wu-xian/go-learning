@@ -6,11 +6,12 @@ import (
 	"learn/src/go-talker/proto"
 	"net"
 	"os"
-	"os/signal"
 	"strconv"
 	"time"
 
 	"learn/src/go-talker/log"
+
+	"learn/src/go-talker/terminal"
 
 	"gopkg.in/ini.v1"
 )
@@ -25,6 +26,8 @@ var (
 )
 
 func main() {
+	terminal.LoopClientUI()
+	return
 	err := Init()
 	if err != nil {
 		fmt.Println(err)
@@ -43,11 +46,13 @@ func main() {
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
-	go func() {
-		signal.Notify(stopIt, os.Interrupt, os.Kill)
-	}()
+	// go func() {
+	// 	signal.Notify(stopIt, os.Interrupt, os.Kill)
+	// }()
 
-	_ = <-stopIt
+	//_ = <-stopIt
+	terminal.LoopClientUI()
+
 	connection.CloseRead()
 	fmt.Println("application stopped")
 }
