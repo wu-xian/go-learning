@@ -13,15 +13,19 @@ func LoopClientUI() {
 
 	ui.Body.Cols = 12
 	ui.Body.Rows = 12
-	p := ui.NewBlock()
-	p.BorderBg = 7
-	p.X = 2
-	p.Y = 2
-	p.XOffset = 0
-	p.YOffset = 0
-	p.Label = "Message"
+	input_box := ui.NewBlock()
+	input_box.BorderBg = 7
+	input_box.Label = "Message"
 
-	ui.Body.Set(6, 6, 12, 12, p)
+	client_list := ui.NewBlock()
+	client_list.BorderBg = 7
+
+	message_list := ui.NewBlock()
+	message_list.BorderBg = 7
+
+	ui.Body.Set(0, 0, 4, 12, client_list)
+	ui.Body.Set(4, 0, 12, 8, message_list)
+	ui.Body.Set(4, 8, 12, 12, input_box)
 
 	ui.Render(ui.Body)
 
@@ -34,12 +38,12 @@ func LoopClientUI() {
 		for {
 			_ = <-c
 			ui.Clear()
+			ui.Body.Resize()
 			ui.Render(ui.Body)
 		}
 	}(resizeChan)
 	ui.On("<resize>", func(e ui.Event) {
 		ui.Body.Width, ui.Body.Height = e.Width, e.Height
-		ui.Body.Resize()
 		resizeChan <- true
 	})
 
