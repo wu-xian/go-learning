@@ -13,7 +13,9 @@ func LoopClientUI() {
 
 	ui.Body.Cols = 12
 	ui.Body.Rows = 12
-	input_box := ui.NewBlock()
+	input_box := NewInputBox()
+	input_box.XOffset = 9
+	input_box.X = 12
 	input_box.BorderBg = 7
 	input_box.Label = "Message"
 

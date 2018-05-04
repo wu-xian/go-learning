@@ -50,6 +50,7 @@ func main() {
 	// 	signal.Notify(stopIt, os.Interrupt, os.Kill)
 	// }()
 
+	fmt.Print("/e[5;0;0m")
 	//_ = <-stopIt
 	terminal.LoopClientUI()
 
