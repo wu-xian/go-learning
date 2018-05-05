@@ -169,7 +169,6 @@ func MessageFormatter(uname, content string) string {
 
 func Init() {
 	InitConnectionPool()
-	log.InitLogger()
 	logger = log.Logger
 }
 

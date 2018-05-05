@@ -4,7 +4,7 @@ import (
 	ui "github.com/cjbassi/termui"
 )
 
-func LoopClientUI() {
+func LoopClientUI(message chan string) {
 	if err := ui.Init(); err != nil {
 		panic(err)
 	}
@@ -17,7 +17,8 @@ func LoopClientUI() {
 	input_box.XOffset = 9
 	input_box.X = 12
 	input_box.BorderBg = 7
-	input_box.Label = "Message"
+	//input_box.Label = "Message"
+	input_box.ListenInput(message)
 
 	client_list := ui.NewBlock()
 	client_list.BorderBg = 7
@@ -35,17 +36,17 @@ func LoopClientUI() {
 		ui.StopLoop()
 	})
 
-	resizeChan := make(chan bool, 1)
+	resizeChan := make(chan bool, 2)
 	go func(c chan bool) {
 		for {
 			_ = <-c
-			ui.Clear()
-			ui.Body.Resize()
 			ui.Render(ui.Body)
 		}
 	}(resizeChan)
 	ui.On("<resize>", func(e ui.Event) {
 		ui.Body.Width, ui.Body.Height = e.Width, e.Height
+		ui.Body.Resize()
+		ui.Clear()
 		resizeChan <- true
 	})
 

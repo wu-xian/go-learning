@@ -22,12 +22,13 @@ var (
 	UName      string
 	Key        string
 	connection *net.TCPConn
+	message    chan string    = make(chan string, 1)
 	stopIt     chan os.Signal = make(chan os.Signal, 1)
 )
 
 func main() {
-	terminal.LoopClientUI()
-	return
+	//terminal.LoopClientUI(message)
+	//return
 	err := Init()
 	if err != nil {
 		fmt.Println(err)
@@ -42,6 +43,7 @@ func main() {
 	log.Logger.Info("has been connected to the server...")
 	if err != nil {
 		log.Logger.Info("unable to connect to the server : %s:%d", IP, Port)
+		return
 	}
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
@@ -50,9 +52,8 @@ func main() {
 	// 	signal.Notify(stopIt, os.Interrupt, os.Kill)
 	// }()
 
-	fmt.Print("/e[5;0;0m")
 	//_ = <-stopIt
-	terminal.LoopClientUI()
+	terminal.LoopClientUI(message)
 
 	connection.CloseRead()
 	fmt.Println("application stopped")
@@ -77,13 +78,8 @@ func MessageReceiver(conn *net.TCPConn) {
 }
 
 func MessagePublisher(conn *net.TCPConn) {
-	content := ""
 	for {
-		_, err := fmt.Scanln(&content)
-		if err != nil {
-			fmt.Println("errors:", err)
-			return
-		}
+		content := <-message
 		message := proto.Message{
 			Content: content,
 			Name:    UName,
@@ -104,7 +100,6 @@ func MessagePublisher(conn *net.TCPConn) {
 }
 
 func Init() error {
-	log.InitLogger()
 	cfg, err := ini.Load("talker.conf")
 	if err != nil {
 		return errors.New("failure to load config file:talker.conf")
