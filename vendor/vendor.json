@@ -9,6 +9,18 @@
 			"revisionTime": "2017-12-18T11:18:59Z"
 		},
 		{
+			"checksumSHA1": "W7v0J7Yh+CSGev2/hg5j2K/XIuw=",
+			"path": "github.com/cheekybits/genny",
+			"revision": "9127e812e1e9e501ce899a18121d316ecb52e4ba",
+			"revisionTime": "2017-03-28T20:00:08Z"
+		},
+		{
+			"checksumSHA1": "p2imddYCGRkCs6Ry3dTG/8bm2Rs=",
+			"path": "github.com/cheekybits/genny/generic",
+			"revision": "9127e812e1e9e501ce899a18121d316ecb52e4ba",
+			"revisionTime": "2017-03-28T20:00:08Z"
+		},
+		{
 			"checksumSHA1": "q7BU3GitaKLTNUCn70KY3TF9NKU=",
 			"path": "github.com/cjbassi/drawille-go",
 			"revision": "ad535d0f92cd951308cdb80675e05c62c6b8b296",

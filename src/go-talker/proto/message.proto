@@ -17,7 +17,7 @@ message Header{
 //###############客户端消息结构###############
 
 //消息体
-message Message{
+message Content{
     Header Head = 1;
     string Content = 2;//消息内容
     string Publisher = 3;//消息发布者

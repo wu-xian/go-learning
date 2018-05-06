@@ -68,7 +68,7 @@ func MessageReceiver(conn *net.TCPConn) {
 			log.Logger.Info("unable to read message", err)
 			return
 		}
-		message, err := proto.BytesToMessage(bytes[:count])
+		message, err := proto.Unmarshal(bytes[:count])
 		if err != nil {
 			log.Logger.Info("invalid message:", err)
 			return
@@ -97,6 +97,10 @@ func MessagePublisher(conn *net.TCPConn) {
 			return
 		}
 	}
+}
+
+func MessageInterpreter(bytes []byte) {
+
 }
 
 func Init() error {

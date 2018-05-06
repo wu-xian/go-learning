@@ -8,11 +8,11 @@ import (
 	p "github.com/golang/protobuf/proto"
 )
 
-func (self *LogoutMessage) Marshal(t LogoutMessage) ([]byte, error) {
+func (self *Content) Marshal(t Content) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *LogoutMessage) Unmarshal(bytes []byte) (t LogoutMessage) {
+func (self *Content) Unmarshal(bytes []byte) (t Content) {
 	p.Unmarshal(bytes, &t)
 	return t
 }
