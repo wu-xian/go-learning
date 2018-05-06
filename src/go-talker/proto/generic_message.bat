@@ -1,0 +1,8 @@
+genny -in .\generic.go.1 -out Header.pb.go gen "T=Header"
+genny -in .\generic.go.1 -out Message.pb.go gen "T=Message"
+genny -in .\generic.go.1 -out LoginMessage.pb.go gen "T=LoginMessage"
+genny -in .\generic.go.1 -out LogoutMessage.pb.go gen "T=LogoutMessage"
+genny -in .\generic.go.1 -out Command.pb.go gen "T=Command"
+genny -in .\generic.go.1 -out CommandResult.pb.go gen "T=CommandResult"
+genny -in .\generic.go.1 -out ClientListResut.pb.go gen "T=ClientListResut"
+genny -in .\generic.go.1 -out MessageHistories.pb.go gen "T=MessageHistories"

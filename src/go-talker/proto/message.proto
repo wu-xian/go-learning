@@ -3,30 +3,68 @@ syntax = "proto3";
 
 package proto;
 
+
+//###############消息头###############
+
+message Header{
+    int64 Type = 1 ; //消息类型 : 0,登入消息 ; 1,登出消息 ; 2, 通讯文本 ; 3,额外的操作
+    int64 Length =2; //消息长度
+}
+
+//####################################
+
+
+//###############客户端消息结构###############
+
 //消息体
 message Message{
-    repeated Header Head = 1;
-    string Content = 2; 
-    string Name = 3;
-    int64 Time     =4;
+    Header Head = 1;
+    string Content = 2;//消息内容
+    string Publisher = 3;//消息发布者
+    int64 Time = 4; //发布时间
 }
 
+//登入消息
 message LoginMessage{
-    repeated Header Head = 1;
-    string Content = 2; 
-    string Name = 3;
-    int64 Time     =4;
+    Header Head = 1;
+    string Name = 2; //登陆用户名
 }
 
+//登出消息
 message LogoutMessage{
-    repeated Header Head = 1;
-    string Content = 2; 
-    string Name = 3;
-    int64 Time     =4;
+    Header Head = 1;
 }
 
-//消息头
-message Header{
-    int Type = 1 ; //消息类型 : 0,登入消息 ; 1,登出消息 ; 2, 通讯文本 ; 3,
-    string Token = 2 ; //
+//操作信息
+message Command{
+    Header Head = 1;
+    int64 OperationType =2 ;//操作类别 : 1,获取客户端列表 ; 2,获取历史信息 ; 3,与服务端重新建立连接 ; 
+
 }
+
+//#############################################
+
+
+//###############服务端消息结构###############
+
+//操作信息处理结果
+message CommandResult{
+    bool OK = 1;
+    string ErrorMessage = 2;
+}
+
+//客户端列表
+message ClientListResut{
+    CommandResult Result = 1;
+    repeated string Clients =2;
+}
+
+//获取历史信息
+message MessageHistories{
+    CommandResult Result =1;
+    string Content = 2;//消息内容
+    string Publisher = 3;//消息发布者
+    int64 Time = 4; //发布时间
+}
+
+//#############################################

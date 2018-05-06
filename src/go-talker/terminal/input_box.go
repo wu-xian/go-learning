@@ -39,14 +39,13 @@ func NewInputBox() *InputBox {
 // Buffer return current input box buffer
 func (self *InputBox) Buffer() *termui.Buffer {
 	buf := self.Block.Buffer()
-	texts := make([]string, 0)
 	width := self.X - 4
 	log.Logger.Info("width,selfText:", width, self.Text)
 	if width <= 0 {
 		return buf
 	}
-	//self.Text = "sadasdasdadsadasdasdasdsadasdasdasdasdasdasdasdasdasdasdsadasdasdadsadasdasdasdsadasdasdasdasdasdasdasdasdasdasd"
 	if len(self.Text) > width {
+		texts := make([]string, 0)
 		lost := self.Text
 		for ; len(lost) > width; lost = lost[width:] {
 			log.Logger.Info("lost len:", len(lost))

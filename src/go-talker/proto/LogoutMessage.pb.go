@@ -6,11 +6,11 @@ package proto
 
 import p "github.com/golang/protobuf/proto"
 
-func ProtoMarshal(t Message) ([]byte, error) {
+func ProtoMarshal(t LogoutMessage) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func ProtoUnmarshal(bytes []byte) (t Message) {
+func ProtoUnmarshal(bytes []byte) (t LogoutMessage) {
 	p.Unmarshal(bytes, &t)
 	return t
 }
