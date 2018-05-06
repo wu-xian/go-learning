@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"learn/packages"
+	"learn/src/basic-learning/packages"
 )
 
 type smoker struct {

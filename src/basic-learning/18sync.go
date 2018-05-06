@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-func main() {
+func main18() {
 	locker := new(sync.RWMutex)
 	i := 1
 	for j := 0; j < 100; j++ {
