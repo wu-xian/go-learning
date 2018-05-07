@@ -12,7 +12,6 @@ func (self *LogoutMessage) Marshal(t LogoutMessage) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *LogoutMessage) Unmarshal(bytes []byte) (t LogoutMessage) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *LogoutMessage) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }

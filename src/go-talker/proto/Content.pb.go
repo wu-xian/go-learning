@@ -12,7 +12,6 @@ func (self *Content) Marshal(t Content) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *Content) Unmarshal(bytes []byte) (t Content) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *Content) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }

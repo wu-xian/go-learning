@@ -13,6 +13,7 @@ import (
 	"learn/src/go-talker/proto"
 
 	"github.com/astaxie/beego/logs"
+	p "github.com/golang/protobuf/proto"
 	cli "github.com/urfave/cli"
 )
 
@@ -31,11 +32,19 @@ type Client struct {
 	Id         uint8
 	Connection *net.TCPConn
 	Address    net.Addr
+	Name       string
 }
 
 type ConnectionPool struct {
 	Locker  sync.Mutex
 	Clients []Client
+}
+
+func getClientIndex() uint8 {
+	clientIndexLocker.Lock()
+	clientIndex++
+	clientIndexLocker.Unlock()
+	return clientIndex
 }
 
 func (self *ConnectionPool) Insert(client Client) {
@@ -126,6 +135,25 @@ func MessageDelivery(client Client) {
 			pool.Remove(client)
 			return
 		}
+		message := MessageInterpreter(bytess[:count])
+		switch t := message.(type) {
+		case proto.LoginMessage:
+			{
+
+			}
+		case proto.LogoutMessage:
+			{
+
+			}
+		case proto.Content:
+			{
+
+			}
+		default:
+			{
+
+			}
+		}
 		message, err := proto.BytesToMessage(bytess[:count])
 		logger.Info("get bytes from client", message)
 		if err != nil {
@@ -167,6 +195,58 @@ func MessageFormatter(uname, content string) string {
 	return fmt.Sprintf("[%s]:%s", uname, content)
 }
 
+func MessageInterpreter(bytes []byte) (msg interface{}) {
+	header := proto.Header{}
+	err := p.Unmarshal(bytes, &header)
+	if err != nil {
+		log.Logger.Info("MessageInterpreter", err)
+		return
+	}
+	switch header.Type {
+	case 0:
+		{
+			lm := proto.LoginMessage{}
+			lm.Unmarshal(bytes)
+			msg = lm
+		}
+	case 1:
+		{
+			lm := proto.LogoutMessage{}
+			lm.Unmarshal(bytes)
+			msg = lm
+		}
+	case 2:
+		{
+			c := proto.Content{}
+			c.Unmarshal(bytes)
+			msg = c
+		}
+	default:
+		{
+			return nil
+		}
+	}
+	return msg
+}
+
+func Login(conn *net.TCPConn, loginMessage proto.LoginMessage) {
+	clientIndex := getClientIndex()
+	client := Client{
+		Address:    conn.RemoteAddr(),
+		Connection: conn,
+		Id:         clientIndex,
+		Name:       loginMessage.Name,
+	}
+	pool.Insert(client)
+}
+
+func Logout(client Client, logoutMessage proto.LogoutMessage) {
+	err := client.Connection.Close()
+	if err != nil {
+		logger.Info("can not read bytes from client", err)
+	}
+	pool.Remove(client)
+}
 func Init() {
 	InitConnectionPool()
 	logger = log.Logger

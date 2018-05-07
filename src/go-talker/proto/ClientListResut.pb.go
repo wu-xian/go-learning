@@ -12,7 +12,6 @@ func (self *ClientListResut) Marshal(t ClientListResut) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *ClientListResut) Unmarshal(bytes []byte) (t ClientListResut) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *ClientListResut) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }

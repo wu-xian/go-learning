@@ -12,7 +12,6 @@ func (self *Command) Marshal(t Command) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *Command) Unmarshal(bytes []byte) (t Command) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *Command) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }

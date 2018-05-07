@@ -12,7 +12,6 @@ func (self *Header) Marshal(t Header) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *Header) Unmarshal(bytes []byte) (t Header) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *Header) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }

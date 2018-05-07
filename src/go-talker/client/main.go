@@ -13,6 +13,8 @@ import (
 
 	"learn/src/go-talker/terminal"
 
+	p "github.com/golang/protobuf/proto"
+
 	"gopkg.in/ini.v1"
 )
 
@@ -99,8 +101,48 @@ func MessagePublisher(conn *net.TCPConn) {
 	}
 }
 
-func MessageInterpreter(bytes []byte) {
+func MessageInterpreter(bytes []byte) (msg interface{}) {
+	header := proto.Header{}
+	err := p.Unmarshal(bytes, &header)
+	if err != nil {
+		log.Logger.Info("MessageInterpreter", err)
+		return
+	}
+	switch header.Type {
+	case 0:
+		{
+			lm := proto.LoginMessage{}
+			lm.Unmarshal(bytes)
+			msg = lm
+		}
+	case 1:
+		{
+			lm := proto.LogoutMessage{}
+			lm.Unmarshal(bytes)
+			msg = lm
+		}
+	case 2:
+		{
+			c := proto.Content{}
+			c.Unmarshal(bytes)
+			msg = c
+		}
+	default:
+		{
+			return nil
+		}
+	}
+	return msg
+}
 
+func Login(conn *net.TCPConn, loginMessage proto.LoginMessage) {
+
+}
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Init() error {

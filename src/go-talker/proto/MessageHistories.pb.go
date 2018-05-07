@@ -12,7 +12,6 @@ func (self *MessageHistories) Marshal(t MessageHistories) ([]byte, error) {
 	return p.Marshal(&t)
 }
 
-func (self *MessageHistories) Unmarshal(bytes []byte) (t MessageHistories) {
-	p.Unmarshal(bytes, &t)
-	return t
+func (self *MessageHistories) Unmarshal(bytes []byte) {
+	p.Unmarshal(bytes, self)
 }
