@@ -139,7 +139,7 @@ func MessageDelivery(client Client) {
 		switch t := message.(type) {
 		case proto.LoginMessage:
 			{
-
+				Login(client)
 			}
 		case proto.LogoutMessage:
 			{
