@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"sync"
+	"time"
 
 	"learn/src/go-talker/log"
 
@@ -27,6 +29,7 @@ var (
 )
 
 const VERSION = "0.0.1"
+const MESSAGE_MAX_LENGTH = 2048
 
 type Client struct {
 	Id         uint8
@@ -47,13 +50,13 @@ func getClientIndex() uint8 {
 	return clientIndex
 }
 
-func (self *ConnectionPool) Insert(client Client) {
+func (self *ConnectionPool) Insert(client *Client) {
 	self.Locker.Lock()
-	self.Clients = append(pool.Clients, client)
+	self.Clients = append(pool.Clients, *client)
 	self.Locker.Unlock()
 }
 
-func (self *ConnectionPool) Remove(client Client) {
+func (self *ConnectionPool) Remove(client *Client) {
 	self.Locker.Lock()
 	for i := 0; i < len(self.Clients); i++ {
 		self.Clients[i].Connection.Write([]byte("client" + strconv.Itoa(int(self.Clients[i].Id))))
@@ -95,17 +98,12 @@ func startAction(ctx *cli.Context) {
 			fmt.Println("open connection:", conn.RemoteAddr())
 			go func(_conn *net.TCPConn) {
 
-				clientIndexLocker.Lock()
-
-				client := Client{
-					Address:    _conn.RemoteAddr(),
-					Connection: _conn,
-					Id:         clientIndex,
+				client, err := Login(_conn)
+				if err != nil {
+					_conn.Close()
+					log.Logger.Info("connection closed  ", err)
+					return
 				}
-				clientIndex++
-				clientIndexLocker.Unlock()
-				pool.Insert(client)
-
 				//broadcast
 				MessageDelivery(client)
 			}(conn)
@@ -122,16 +120,16 @@ func startAction(ctx *cli.Context) {
 	fmt.Print("application stopped")
 }
 
-func MessageDelivery(client Client) {
-	bytess := make([]byte, 20480)
+func MessageDelivery(client *Client) {
+	defer logger.Info("closed connection", client.Id)
+	defer client.Connection.Close()
+	bytess := make([]byte, MESSAGE_MAX_LENGTH)
 	for {
 		count, err := client.Connection.Read(bytess)
 		//client.Connection.CloseRead()
 		log.Logger.Info("get bytes from client ", bytess[:count])
 		if err != nil {
 			logger.Info("read bytes :", err)
-			logger.Info("close connection", client.Id)
-			client.Connection.Close()
 			pool.Remove(client)
 			return
 		}
@@ -139,7 +137,8 @@ func MessageDelivery(client Client) {
 		switch t := message.(type) {
 		case proto.LoginMessage:
 			{
-				Login(client)
+				log.Logger.Info("so much login message")
+				return
 			}
 		case proto.LogoutMessage:
 			{
@@ -229,15 +228,43 @@ func MessageInterpreter(bytes []byte) (msg interface{}) {
 	return msg
 }
 
-func Login(conn *net.TCPConn, loginMessage proto.LoginMessage) {
+func Login(conn *net.TCPConn) (client *Client, err error) {
+	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
+		return nil, err
+	}
+	bytes := make([]byte, MESSAGE_MAX_LENGTH)
+	var loginMessage proto.LoginMessage
+	for i := 0; i < 3; i++ {
+		count, err := conn.Read(bytes[:])
+		if count == MESSAGE_MAX_LENGTH {
+			return nil, errors.New("message too large")
+		}
+		msg := MessageInterpreter(bytes[:count])
+		switch msg.(type) {
+		case proto.LoginMessage:
+			{
+				loginMessage = msg.(proto.LoginMessage)
+				break
+			}
+		default:
+			{
+				if i == 2 {
+					return nil, errors.New("wrong login message")
+				}
+				time.Sleep(time.Second * 3)
+				continue
+			}
+		}
+	}
 	clientIndex := getClientIndex()
-	client := Client{
+	client = &Client{
 		Address:    conn.RemoteAddr(),
 		Connection: conn,
 		Id:         clientIndex,
 		Name:       loginMessage.Name,
 	}
 	pool.Insert(client)
+	return client, nil
 }
 
 func Logout(client Client, logoutMessage proto.LogoutMessage) {
