@@ -8,8 +8,8 @@ import (
 	p "github.com/golang/protobuf/proto"
 )
 
-func (self *CommandResult) Marshal(t CommandResult) ([]byte, error) {
-	return p.Marshal(&t)
+func (self *CommandResult) Marshal() ([]byte, error) {
+	return p.Marshal(self)
 }
 
 func (self *CommandResult) Unmarshal(bytes []byte) {

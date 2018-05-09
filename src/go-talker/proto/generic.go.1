@@ -5,8 +5,8 @@ import	p "github.com/golang/protobuf/proto"
 
 type T generic.Type
 
-func (self *T) Marshal(t T) ([]byte, error) {
-	return p.Marshal(&t)
+func (self *T) Marshal() ([]byte, error) {
+	return p.Marshal(self)
 }
 
 func (self *T) Unmarshal(bytes []byte) {

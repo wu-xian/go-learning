@@ -28,11 +28,14 @@ message Content{
 message LoginMessage{
     Header Head = 1;
     string Name = 2; //登陆用户名
+    int32 Id = 3;//唯一标识
 }
 
 //登出消息
 message LogoutMessage{
     Header Head = 1;
+    string Name = 2 ;//登出用户
+    int32 Id = 3;
 }
 
 //操作信息

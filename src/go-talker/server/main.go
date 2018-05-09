@@ -14,6 +14,8 @@ import (
 
 	"learn/src/go-talker/proto"
 
+	"learn/src/go-talker/common"
+
 	"github.com/astaxie/beego/logs"
 	p "github.com/golang/protobuf/proto"
 	cli "github.com/urfave/cli"
@@ -97,15 +99,33 @@ func startAction(ctx *cli.Context) {
 			conn := rawConn.(*net.TCPConn)
 			fmt.Println("open connection:", conn.RemoteAddr())
 			go func(_conn *net.TCPConn) {
-
-				client, err := Login(_conn)
+				defer log.Logger.Info("connection closed : ", _conn.RemoteAddr().String())
+				defer _conn.Close()
+				client, loginMessage, err := Login(_conn)
 				if err != nil {
-					_conn.Close()
 					log.Logger.Info("connection closed  ", err)
 					return
 				}
+				if loginMessage == nil {
+					log.Logger.Info("wrong message")
+					return
+				}
+				BroadcastMessage(loginMessage)
 				//broadcast
 				MessageDelivery(client)
+
+				logoutMessage := proto.LogoutMessage{
+					Id:   int32(client.Id),
+					Name: client.Name,
+					Head: &proto.Header{
+						Type:   1,
+						Length: 0,
+					},
+				}
+
+				logoutMessage.Head.Length = int64(p.Size(&logoutMessage))
+				BroadcastMessage(logoutMessage)
+				Logout(client, logoutMessage)
 			}(conn)
 		}
 	}(listener)
@@ -121,8 +141,6 @@ func startAction(ctx *cli.Context) {
 }
 
 func MessageDelivery(client *Client) {
-	defer logger.Info("closed connection", client.Id)
-	defer client.Connection.Close()
 	bytess := make([]byte, MESSAGE_MAX_LENGTH)
 	for {
 		count, err := client.Connection.Read(bytess)
@@ -134,7 +152,7 @@ func MessageDelivery(client *Client) {
 			return
 		}
 		message := MessageInterpreter(bytess[:count])
-		switch t := message.(type) {
+		switch message.(type) {
 		case proto.LoginMessage:
 			{
 				log.Logger.Info("so much login message")
@@ -142,53 +160,80 @@ func MessageDelivery(client *Client) {
 			}
 		case proto.LogoutMessage:
 			{
-
+				return
 			}
 		case proto.Content:
 			{
-
+				content := message.(proto.Content)
+				logger.Info("get bytes from client", content)
+				if err != nil {
+					logger.Info("can not read bytes from client", err)
+					client.Connection.Close()
+					pool.Remove(client)
+					return
+				}
+				formattedMessage := MessageFormatter(client.Name, content.Content)
+				content.Content = formattedMessage
+				content.Unmarshal(bytess)
+				if err != nil {
+					client.Connection.Close()
+					pool.Remove(client)
+					return
+				}
+				pool.Locker.Lock()
+				for i := 0; i < len(pool.Clients); i++ {
+					currentClient := pool.Clients[i]
+					if currentClient.Id == client.Id {
+						continue
+					}
+					currentClient.Connection.Write(bytess)
+				}
+				pool.Locker.Unlock()
 			}
 		default:
 			{
-
+				log.Logger.Info("unknown message type")
+				return
 			}
 		}
-		message, err := proto.BytesToMessage(bytess[:count])
-		logger.Info("get bytes from client", message)
-		if err != nil {
-			logger.Info("can not read bytes from client", err)
-			client.Connection.Close()
-			pool.Remove(client)
-			return
-		}
-		if len(message.Name) == 0 {
-			logger.Info("client name is empty")
-			client.Connection.Close()
-			pool.Remove(client)
-			return
-		}
-		formattedMessage := MessageFormatter(message.Name, message.Content)
-		message.Content = formattedMessage
-		messageBytes, err := proto.MessageToBytes(message)
-		if err != nil {
-			client.Connection.Close()
-			pool.Remove(client)
-			return
-		}
-		pool.Locker.Lock()
-		for i := 0; i < len(pool.Clients); i++ {
-			currentClient := pool.Clients[i]
-			if currentClient.Id == client.Id {
-				continue
-			}
-			currentClient.Connection.Write(messageBytes)
-			//currentClient.Connection.CloseWrite()
-		}
-		pool.Locker.Unlock()
 	}
 }
 
-func BroadcastMessage() {}
+func BroadcastMessage(message interface{}) {
+	bytes := make([]byte, MESSAGE_MAX_LENGTH)
+	switch message.(type) {
+	case proto.LoginMessage:
+		{
+			m := message.(proto.LoginMessage)
+			bytes1, err := m.Marshal()
+			bytes = bytes1
+			common.CheckError(err)
+		}
+	case proto.LogoutMessage:
+		{
+			m := message.(proto.LogoutMessage)
+			bytes1, err := m.Marshal()
+			bytes = bytes1
+			common.CheckError(err)
+		}
+	case proto.Content:
+		{
+			m := message.(proto.Content)
+			bytes1, err := m.Marshal()
+			bytes = bytes1
+			common.CheckError(err)
+		}
+	default:
+		{
+			return
+		}
+	}
+	pool.Locker.Lock()
+	for i := 0; i < len(pool.Clients); i++ {
+		pool.Clients[i].Connection.Write(bytes)
+	}
+	pool.Locker.Unlock()
+}
 
 func MessageFormatter(uname, content string) string {
 	return fmt.Sprintf("[%s]:%s", uname, content)
@@ -228,16 +273,17 @@ func MessageInterpreter(bytes []byte) (msg interface{}) {
 	return msg
 }
 
-func Login(conn *net.TCPConn) (client *Client, err error) {
+func Login(conn *net.TCPConn) (client *Client, message *proto.LoginMessage, err error) {
 	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	bytes := make([]byte, MESSAGE_MAX_LENGTH)
 	var loginMessage proto.LoginMessage
 	for i := 0; i < 3; i++ {
 		count, err := conn.Read(bytes[:])
+		common.CheckError(err)
 		if count == MESSAGE_MAX_LENGTH {
-			return nil, errors.New("message too large")
+			return nil, nil, errors.New("message too large")
 		}
 		msg := MessageInterpreter(bytes[:count])
 		switch msg.(type) {
@@ -249,7 +295,7 @@ func Login(conn *net.TCPConn) (client *Client, err error) {
 		default:
 			{
 				if i == 2 {
-					return nil, errors.New("wrong login message")
+					return nil, nil, errors.New("wrong login message")
 				}
 				time.Sleep(time.Second * 3)
 				continue
@@ -264,10 +310,10 @@ func Login(conn *net.TCPConn) (client *Client, err error) {
 		Name:       loginMessage.Name,
 	}
 	pool.Insert(client)
-	return client, nil
+	return client, &loginMessage, nil
 }
 
-func Logout(client Client, logoutMessage proto.LogoutMessage) {
+func Logout(client *Client, logoutMessage proto.LogoutMessage) {
 	err := client.Connection.Close()
 	if err != nil {
 		logger.Info("can not read bytes from client", err)
