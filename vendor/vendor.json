@@ -99,6 +99,12 @@
 			"revisionTime": "2018-04-08T05:53:51Z"
 		},
 		{
+			"checksumSHA1": "QbTJyGBZrsGnzQVd2m73neXGimM=",
+			"path": "github.com/mauricelam/genny/generic",
+			"revision": "9d8700bcc567cd22ea2ef42ce5835a9c80296c4a",
+			"revisionTime": "2018-02-02T08:35:57Z"
+		},
+		{
 			"checksumSHA1": "7sM0tWZLQWYgjZuSniTDZLrQl1I=",
 			"path": "github.com/mitchellh/go-wordwrap",
 			"revision": "ad45545899c7b13c020ea92b2072220eefad42b8",

@@ -6,12 +6,11 @@ import (
 	"learn/src/go-talker/proto"
 	"net"
 	"os"
+	"os/signal"
 	"strconv"
 	"time"
 
 	"learn/src/go-talker/log"
-
-	"learn/src/go-talker/terminal"
 
 	p "github.com/golang/protobuf/proto"
 
@@ -27,6 +26,8 @@ var (
 	message    chan string    = make(chan string, 1)
 	stopIt     chan os.Signal = make(chan os.Signal, 1)
 )
+
+const MESSAGE_MAX_LENGTH = 2048
 
 func main() {
 	//terminal.LoopClientUI(message)
@@ -50,12 +51,12 @@ func main() {
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
-	// go func() {
-	// 	signal.Notify(stopIt, os.Interrupt, os.Kill)
-	// }()
+	go func() {
+		signal.Notify(stopIt, os.Interrupt, os.Kill)
+	}()
 
-	//_ = <-stopIt
-	terminal.LoopClientUI(message)
+	_ = <-stopIt
+	//terminal.LoopClientUI(message)
 
 	connection.CloseRead()
 	fmt.Println("application stopped")
@@ -63,31 +64,43 @@ func main() {
 
 func MessageReceiver(conn *net.TCPConn) {
 	for {
-		bytes := make([]byte, 20480)
+		bytes := make([]byte, MESSAGE_MAX_LENGTH)
 		count, err := conn.Read(bytes)
 		//conn.CloseRead()
 		if err != nil {
 			log.Logger.Info("unable to read message", err)
 			return
 		}
-		message, err := proto.Unmarshal(bytes[:count])
+		message := MessageInterpreter(bytes[:count])
 		if err != nil {
 			log.Logger.Info("invalid message:", err)
 			return
 		}
-		fmt.Println(message.Content)
+		switch message.(type) {
+		case proto.Content:
+			{
+				fmt.Println(message.(proto.Content).Content)
+			}
+		default:
+			{
+				fmt.Println("default message")
+			}
+		}
 	}
 }
 
 func MessagePublisher(conn *net.TCPConn) {
 	for {
 		content := <-message
-		message := proto.Message{
+		message := proto.Content{
 			Content: content,
-			Name:    UName,
 			Time:    time.Now().Unix(),
+			Head: &proto.Header{
+				Type:   3,
+				Length: 0,
+			},
 		}
-		bytess, err := proto.MessageToBytes(&message)
+		bytess, err := message.Marshal()
 		log.Logger.Info("get bytes ", bytess)
 		if err != nil {
 			return

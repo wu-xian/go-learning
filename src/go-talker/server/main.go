@@ -17,7 +17,6 @@ import (
 	"learn/src/go-talker/common"
 
 	"github.com/astaxie/beego/logs"
-	p "github.com/golang/protobuf/proto"
 	cli "github.com/urfave/cli"
 )
 
@@ -26,7 +25,7 @@ var (
 	stopIt            chan os.Signal = make(chan os.Signal, 1)
 	port              string         = ":34567"
 	pool              *ConnectionPool
-	clientIndex       uint8 = 1
+	clientIndex       int32 = 1
 	clientIndexLocker sync.Mutex
 )
 
@@ -34,7 +33,7 @@ const VERSION = "0.0.1"
 const MESSAGE_MAX_LENGTH = 2048
 
 type Client struct {
-	Id         uint8
+	Id         int32
 	Connection *net.TCPConn
 	Address    net.Addr
 	Name       string
@@ -45,7 +44,7 @@ type ConnectionPool struct {
 	Clients []Client
 }
 
-func getClientIndex() uint8 {
+func getClientIndex() int32 {
 	clientIndexLocker.Lock()
 	clientIndex++
 	clientIndexLocker.Unlock()
@@ -110,22 +109,10 @@ func startAction(ctx *cli.Context) {
 					log.Logger.Info("wrong message")
 					return
 				}
-				BroadcastMessage(loginMessage)
 				//broadcast
 				MessageDelivery(client)
 
-				logoutMessage := proto.LogoutMessage{
-					Id:   int32(client.Id),
-					Name: client.Name,
-					Head: &proto.Header{
-						Type:   1,
-						Length: 0,
-					},
-				}
-
-				logoutMessage.Head.Length = int64(p.Size(&logoutMessage))
-				BroadcastMessage(logoutMessage)
-				Logout(client, logoutMessage)
+				Logout(client)
 			}(conn)
 		}
 	}(listener)
@@ -140,44 +127,38 @@ func startAction(ctx *cli.Context) {
 	fmt.Print("application stopped")
 }
 
+//MessageDelivery 消息分发
 func MessageDelivery(client *Client) {
-	bytess := make([]byte, MESSAGE_MAX_LENGTH)
+	bytes := make([]byte, MESSAGE_MAX_LENGTH)
 	for {
-		count, err := client.Connection.Read(bytess)
-		//client.Connection.CloseRead()
-		log.Logger.Info("get bytes from client ", bytess[:count])
+		count, err := client.Connection.Read(bytes)
+		log.Logger.Info("get bytes from client ", bytes[:count])
 		if err != nil {
 			logger.Info("read bytes :", err)
 			pool.Remove(client)
 			return
 		}
-		message := MessageInterpreter(bytess[:count])
-		switch message.(type) {
-		case proto.LoginMessage:
+		message := MessageInterpreter(bytes[:count])
+		switch message.Type {
+		case proto.COMMUNICATION_TYPE_LogoutRequest:
 			{
-				log.Logger.Info("so much login message")
+				Logout(client)
 				return
 			}
-		case proto.LogoutMessage:
+		case proto.COMMUNICATION_TYPE_ClientSend:
 			{
-				return
-			}
-		case proto.Content:
-			{
-				content := message.(proto.Content)
-				logger.Info("get bytes from client", content)
-				if err != nil {
-					logger.Info("can not read bytes from client", err)
-					client.Connection.Close()
-					pool.Remove(client)
-					return
+				logger.Info("get bytes from client", message.MessageClientSend.Content)
+				messageReceive := &proto.MessageWarpper{
+					Type: proto.COMMUNICATION_TYPE_ClientReceived,
+					MessageClientReceived: &proto.MessageClientReceived{
+						Id:      client.Id,
+						Name:    client.Name,
+						Content: message.MessageClientSend.Content,
+					},
 				}
-				formattedMessage := MessageFormatter(client.Name, content.Content)
-				content.Content = formattedMessage
-				content.Unmarshal(bytess)
+				bytesTmp, err := messageReceive.Marshal()
 				if err != nil {
-					client.Connection.Close()
-					pool.Remove(client)
+					log.Logger.Info("err", err)
 					return
 				}
 				pool.Locker.Lock()
@@ -186,7 +167,7 @@ func MessageDelivery(client *Client) {
 					if currentClient.Id == client.Id {
 						continue
 					}
-					currentClient.Connection.Write(bytess)
+					currentClient.Connection.Write(bytesTmp)
 				}
 				pool.Locker.Unlock()
 			}
@@ -199,35 +180,22 @@ func MessageDelivery(client *Client) {
 	}
 }
 
-func BroadcastMessage(message interface{}) {
-	bytes := make([]byte, MESSAGE_MAX_LENGTH)
-	switch message.(type) {
-	case proto.LoginMessage:
-		{
-			m := message.(proto.LoginMessage)
-			bytes1, err := m.Marshal()
-			bytes = bytes1
-			common.CheckError(err)
-		}
-	case proto.LogoutMessage:
-		{
-			m := message.(proto.LogoutMessage)
-			bytes1, err := m.Marshal()
-			bytes = bytes1
-			common.CheckError(err)
-		}
-	case proto.Content:
-		{
-			m := message.(proto.Content)
-			bytes1, err := m.Marshal()
-			bytes = bytes1
-			common.CheckError(err)
-		}
-	default:
-		{
-			return
-		}
+//BroadcastMessage 广播消息
+func BroadcastMessage(message *proto.MessageWarpper) {
+	bytes, err := message.Marshal()
+	if err != nil {
+		logger.Info("err", err)
+		return
 	}
+
+	messageType := message.Type
+	if messageType != proto.COMMUNICATION_TYPE_ClientLogin ||
+		messageType != proto.COMMUNICATION_TYPE_ClientLogout ||
+		messageType != proto.COMMUNICATION_TYPE_ClientReceived {
+		logger.Info("invalid message type")
+		return
+	}
+
 	pool.Locker.Lock()
 	for i := 0; i < len(pool.Clients); i++ {
 		pool.Clients[i].Connection.Write(bytes)
@@ -235,91 +203,212 @@ func BroadcastMessage(message interface{}) {
 	pool.Locker.Unlock()
 }
 
-func MessageFormatter(uname, content string) string {
-	return fmt.Sprintf("[%s]:%s", uname, content)
-}
-
-func MessageInterpreter(bytes []byte) (msg interface{}) {
-	header := proto.Header{}
-	err := p.Unmarshal(bytes, &header)
+//MessageInterpreter 获取包装壳
+func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
+	warpper := &proto.MessageWarpper{}
+	err := warpper.Unmarshal(bytes)
 	if err != nil {
-		log.Logger.Info("MessageInterpreter", err)
-		return
+		logger.Info("", err)
+		return nil
 	}
-	switch header.Type {
-	case 0:
-		{
-			lm := proto.LoginMessage{}
-			lm.Unmarshal(bytes)
-			msg = lm
-		}
-	case 1:
-		{
-			lm := proto.LogoutMessage{}
-			lm.Unmarshal(bytes)
-			msg = lm
-		}
-	case 2:
-		{
-			c := proto.Content{}
-			c.Unmarshal(bytes)
-			msg = c
-		}
-	default:
-		{
-			return nil
-		}
-	}
-	return msg
+	return warpper
+	// switch warpper.Type {
+
+	// //客户端登陆请求
+	// case 0:
+	// 	{
+	// 		lm := proto.LoginMessage{}
+	// 		lm.Unmarshal(bytes)
+	// 		msg = lm
+	// 	}
+
+	// 	//客户端登陆响应
+	// case 1:
+	// 	{
+	// 		lm := proto.LogoutMessage{}
+	// 		lm.Unmarshal(bytes)
+	// 		msg = lm
+	// 	}
+
+	// 	//客户端登出请求
+	// case 2:
+	// 	{
+	// 		c := proto.Content{}
+	// 		c.Unmarshal(bytes)
+	// 		msg = c
+	// 	}
+
+	// 	//客户端登出响应
+	// case 3:
+	// 	{
+
+	// 	}
+
+	// //其他客户端登陆
+	// case 4:
+	// 	{
+
+	// 	}
+	// 	//其他客户端登出
+	// case 5:
+	// 	{
+
+	// 	}
+
+	// //客户端接收消息
+	// case 6:
+	// 	{
+
+	// 	}
+
+	// //客户端发送消息
+	// case 7:
+	// 	{
+
+	// 	}
+
+	// default:
+	// 	{
+	// 		return nil
+	// 	}
+	// }
+	// return msg
 }
 
-func Login(conn *net.TCPConn) (client *Client, message *proto.LoginMessage, err error) {
+//Login 用户登入
+func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, err error) {
 	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return nil, nil, err
 	}
 	bytes := make([]byte, MESSAGE_MAX_LENGTH)
-	var loginMessage proto.LoginMessage
+	var loginMessage proto.MessageWarpper
 	for i := 0; i < 3; i++ {
 		count, err := conn.Read(bytes[:])
 		common.CheckError(err)
-		if count == MESSAGE_MAX_LENGTH {
+		if count >= MESSAGE_MAX_LENGTH {
 			return nil, nil, errors.New("message too large")
 		}
 		msg := MessageInterpreter(bytes[:count])
-		switch msg.(type) {
-		case proto.LoginMessage:
-			{
-				loginMessage = msg.(proto.LoginMessage)
-				break
-			}
-		default:
-			{
-				if i == 2 {
-					return nil, nil, errors.New("wrong login message")
-				}
-				time.Sleep(time.Second * 3)
-				continue
-			}
+		if msg.Type == proto.COMMUNICATION_TYPE_LoginRequest {
+			break
 		}
+		if i == 2 {
+			LoginFault(client)
+			return nil, nil, errors.New("wrong login message")
+		}
+		time.Sleep(time.Second * 3)
+		continue
 	}
 	clientIndex := getClientIndex()
 	client = &Client{
 		Address:    conn.RemoteAddr(),
 		Connection: conn,
 		Id:         clientIndex,
-		Name:       loginMessage.Name,
+		Name:       loginMessage.MessageLoginRequest.Name,
 	}
 	pool.Insert(client)
+	LoginSucceed(client)
+	BroadcastClientLogin(client)
 	return client, &loginMessage, nil
 }
 
-func Logout(client *Client, logoutMessage proto.LogoutMessage) {
-	err := client.Connection.Close()
-	if err != nil {
-		logger.Info("can not read bytes from client", err)
+//BroadcastClientLogin 广播用户登入
+func BroadcastClientLogin(client *Client) error {
+	clientLoginMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_ClientLogin,
+		MessageClientLogin: &proto.MessageClientLogin{
+			Id:   client.Id,
+			Name: client.Name,
+		},
 	}
+	BroadcastMessage(clientLoginMessage)
+	return nil
+}
+
+//LoginSucceed 用户登入成功
+func LoginSucceed(client *Client) error {
+	loginResponseMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_LoginResponse,
+		MessageLoginResponse: &proto.MessageLoginResponse{
+			Succeed: true,
+		},
+	}
+	bytes, err := loginResponseMessage.Marshal()
+	if err != nil {
+		return err
+	}
+	client.Connection.Write(bytes)
+	return nil
+}
+
+//LoginFault 用户登入失败
+func LoginFault(client *Client) error {
+	loginResponseMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_LoginResponse,
+		MessageLoginResponse: &proto.MessageLoginResponse{
+			Succeed: false,
+		},
+	}
+	bytes, err := loginResponseMessage.Marshal()
+	if err != nil {
+		return err
+	}
+	client.Connection.Write(bytes)
+	return nil
+}
+
+//Logout 用户登出
+func Logout(client *Client) {
+	BroadcastClientLogout(client)
+	LogoutSucceed(client)
 	pool.Remove(client)
 }
+
+//BroadcastClientLogout 广播用户登出
+func BroadcastClientLogout(client *Client) error {
+	logoutMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_ClientLogout,
+		MessageClientLogout: &proto.MessageClientLogout{
+			Id:   client.Id,
+			Name: client.Name,
+		},
+	}
+	BroadcastMessage(logoutMessage)
+	return nil
+}
+
+//LogoutSucceed 用户登出成功
+func LogoutSucceed(client *Client) error {
+	logoutMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_LogoutResponse,
+		MessageLogoutResponse: &proto.MessageLogoutResponse{
+			Succeed: true,
+		},
+	}
+	bytes, err := logoutMessage.Marshal()
+	if err != nil {
+		return err
+	}
+	client.Connection.Write(bytes)
+	return nil
+}
+
+//LogoutFault 用户登出失败
+func LogoutFault(client *Client) error {
+	logoutMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_LogoutResponse,
+		MessageLogoutResponse: &proto.MessageLogoutResponse{
+			Succeed: false,
+		},
+	}
+	bytes, err := logoutMessage.Marshal()
+	if err != nil {
+		return err
+	}
+	client.Connection.Write(bytes)
+	return nil
+}
+
 func Init() {
 	InitConnectionPool()
 	logger = log.Logger

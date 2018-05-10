@@ -3,71 +3,72 @@ syntax = "proto3";
 
 package proto;
 
-
-//###############消息头###############
-
-message Header{
-    int64 Type = 1 ; //消息类型 : 0,登入消息 ; 1,登出消息 ; 2, 通讯文本 ; 3,额外的操作
-    int64 Length =2; //消息长度
+//通讯类型
+enum COMMUNICATION_TYPE{
+    LoginRequest = 0; //客户端登陆请求
+    LoginResponse = 1;//客户端登陆响应
+    LogoutRequest = 2;//客户端登出请求
+    LogoutResponse = 3;//客户端登出响应
+    ClientLogin =4;//其他客户端登陆
+    ClientLogout =5;//其他客户端登出
+    ClientReceived = 6;//客户端接收消息
+    ClientSend = 7; //客户端发送消息
 }
 
-//####################################
-
-
-//###############客户端消息结构###############
-
-//消息体
-message Content{
-    Header Head = 1;
-    string Content = 2;//消息内容
-    string Publisher = 3;//消息发布者
-    int64 Time = 4; //发布时间
+//消息壳
+message MessageWarpper{
+    COMMUNICATION_TYPE Type = 1;//消息类型
+    MessageLoginRequest MessageLoginRequest =2 ;//客户端登陆响应
+    MessageLoginResponse MessageLoginResponse = 3;//客户端登陆响应
+    MessageLogoutRequest MessageLogoutRequest =4;//客户端登出请求
+    MessageLogoutResponse MessageLogoutResponse =5;//客户端登出响应
+    MessageClientLogin MessageClientLogin=6;//其他客户端登陆
+    MessageClientLogout MessageClientLogout=7;//其他客户端登出
+    MessageClientReceived MessageClientReceived=8;//客户端接收消息
+    MessageClientSend MessageClientSend=9;//客户端发送消息
 }
 
-//登入消息
-message LoginMessage{
-    Header Head = 1;
-    string Name = 2; //登陆用户名
-    int32 Id = 3;//唯一标识
+//客户端登入请求
+message MessageLoginRequest{
+    string Name = 1;
+    string Token = 2;
 }
 
-//登出消息
-message LogoutMessage{
-    Header Head = 1;
-    string Name = 2 ;//登出用户
-    int32 Id = 3;
+//客户端登入响应
+message MessageLoginResponse{
+    bool Succeed = 1;
 }
 
-//操作信息
-message Command{
-    Header Head = 1;
-    int64 OperationType =2 ;//操作类别 : 1,获取客户端列表 ; 2,获取历史信息 ; 3,与服务端重新建立连接 ; 
+//客户端登出请求
+message MessageLogoutRequest{
 
 }
 
-//#############################################
-
-
-//###############服务端消息结构###############
-
-//操作信息处理结果
-message CommandResult{
-    bool OK = 1;
-    string ErrorMessage = 2;
+//客户端登出响应
+message MessageLogoutResponse{
+    bool Succeed = 1;
 }
 
-//客户端列表
-message ClientListResut{
-    CommandResult Result = 1;
-    repeated string Clients =2;
+//其他客户端登陆
+message MessageClientLogin{
+    int32 Id = 1;
+    string Name = 2;
 }
 
-//获取历史信息
-message MessageHistories{
-    CommandResult Result =1;
-    string Content = 2;//消息内容
-    string Publisher = 3;//消息发布者
-    int64 Time = 4; //发布时间
+//其他客户端登出
+message MessageClientLogout{
+    int32 Id = 1;
+    string Name = 2;
 }
 
-//#############################################
+//客户端接收消息
+message MessageClientReceived{
+    int32 Id = 1;
+    string Name = 2;
+    string Content = 3;
+}
+
+//客户端发送消息
+message MessageClientSend{
+    string Content = 1;
+}

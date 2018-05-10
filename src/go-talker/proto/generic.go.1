@@ -9,6 +9,6 @@ func (self *T) Marshal() ([]byte, error) {
 	return p.Marshal(self)
 }
 
-func (self *T) Unmarshal(bytes []byte) {
-	p.Unmarshal(bytes, self)
+func (self *T) Unmarshal(bytes []byte) error {
+	return p.Unmarshal(bytes, self)
 }
