@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"learn/src/go-talker/common"
 	"learn/src/go-talker/proto"
 	"net"
 	"os"
@@ -11,8 +12,6 @@ import (
 	"time"
 
 	"learn/src/go-talker/log"
-
-	p "github.com/golang/protobuf/proto"
 
 	"gopkg.in/ini.v1"
 )
@@ -48,6 +47,13 @@ func main() {
 		log.Logger.Info("unable to connect to the server : %s:%d", IP, Port)
 		return
 	}
+
+	err = Login(connection)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
@@ -55,9 +61,12 @@ func main() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
 	}()
 
+	Logout(connection)
+
 	_ = <-stopIt
 	//terminal.LoopClientUI(message)
 
+	Logout(connection)
 	connection.CloseRead()
 	fmt.Println("application stopped")
 }
@@ -76,10 +85,10 @@ func MessageReceiver(conn *net.TCPConn) {
 			log.Logger.Info("invalid message:", err)
 			return
 		}
-		switch message.(type) {
-		case proto.Content:
+		switch message.Type {
+		case proto.COMMUNICATION_TYPE_ClientReceived:
 			{
-				fmt.Println(message.(proto.Content).Content)
+				fmt.Println(message.MessageClientReceived.Content)
 			}
 		default:
 			{
@@ -92,12 +101,10 @@ func MessageReceiver(conn *net.TCPConn) {
 func MessagePublisher(conn *net.TCPConn) {
 	for {
 		content := <-message
-		message := proto.Content{
-			Content: content,
-			Time:    time.Now().Unix(),
-			Head: &proto.Header{
-				Type:   3,
-				Length: 0,
+		message := proto.MessageWarpper{
+			Type: proto.COMMUNICATION_TYPE_ClientSend,
+			MessageClientSend: &proto.MessageClientSend{
+				Content: content,
 			},
 		}
 		bytess, err := message.Marshal()
@@ -114,42 +121,88 @@ func MessagePublisher(conn *net.TCPConn) {
 	}
 }
 
-func MessageInterpreter(bytes []byte) (msg interface{}) {
-	header := proto.Header{}
-	err := p.Unmarshal(bytes, &header)
+//MessageInterpreter 获取包装壳
+func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
+	warpper := &proto.MessageWarpper{}
+	err := warpper.Unmarshal(bytes)
 	if err != nil {
-		log.Logger.Info("MessageInterpreter", err)
-		return
+		log.Logger.Info("", err)
+		return nil
 	}
-	switch header.Type {
-	case 0:
-		{
-			lm := proto.LoginMessage{}
-			lm.Unmarshal(bytes)
-			msg = lm
-		}
-	case 1:
-		{
-			lm := proto.LogoutMessage{}
-			lm.Unmarshal(bytes)
-			msg = lm
-		}
-	case 2:
-		{
-			c := proto.Content{}
-			c.Unmarshal(bytes)
-			msg = c
-		}
-	default:
-		{
-			return nil
-		}
-	}
-	return msg
+	return warpper
 }
 
-func Login(conn *net.TCPConn, loginMessage proto.LoginMessage) {
+//Login 客户端登陆
+func Login(conn *net.TCPConn) error {
+	loginMessage := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_LoginRequest,
+		MessageLoginRequest: &proto.MessageLoginRequest{
+			Name:  UName,
+			Token: "",
+		},
+	}
+	bytes, err := loginMessage.Marshal()
+	if err != nil {
+		log.Logger.Info("", err)
+		return err
+	}
+	for i := 0; i < 3; i++ {
+		count, err := conn.Write(bytes)
+		common.CheckError(err)
+		if count >= MESSAGE_MAX_LENGTH {
+			return errors.New("message too large")
+		}
 
+		readBytes := make([]byte, 0)
+		count, err = conn.Read(readBytes)
+		msg := MessageInterpreter(readBytes[:count])
+		if msg.Type == proto.COMMUNICATION_TYPE_LoginResponse &&
+			msg.MessageLoginResponse.Succeed {
+			break
+		}
+		if i == 2 {
+			return errors.New("wrong login message")
+		}
+		time.Sleep(time.Second * 3)
+		continue
+	}
+
+	return nil
+}
+
+//Login 客户端登出
+func Logout(conn *net.TCPConn) error {
+	logoutMessage := &proto.MessageWarpper{
+		Type:                 proto.COMMUNICATION_TYPE_LogoutRequest,
+		MessageLogoutRequest: &proto.MessageLogoutRequest{},
+	}
+	bytes, err := logoutMessage.Marshal()
+	if err != nil {
+		log.Logger.Info("", err)
+		return err
+	}
+	for i := 0; i < 3; i++ {
+		count, err := conn.Write(bytes)
+		common.CheckError(err)
+		if count >= MESSAGE_MAX_LENGTH {
+			return errors.New("message too large")
+		}
+
+		readBytes := make([]byte, 0)
+		count, err = conn.Read(readBytes)
+		msg := MessageInterpreter(readBytes[:count])
+		if msg.Type == proto.COMMUNICATION_TYPE_LogoutResponse &&
+			msg.MessageLogoutResponse.Succeed {
+			break
+		}
+		if i == 2 {
+			return errors.New("wrong logout message")
+		}
+		time.Sleep(time.Second * 3)
+		continue
+	}
+
+	return nil
 }
 
 func CheckError(err error) {
