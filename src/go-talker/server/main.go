@@ -107,6 +107,7 @@ func startAction(ctx *cli.Context) {
 					log.Logger.Info("wrong message")
 					return
 				}
+
 				//broadcast
 				MessageDelivery(client)
 
@@ -129,6 +130,7 @@ func startAction(ctx *cli.Context) {
 func MessageDelivery(client *Client) {
 	bytes := make([]byte, MESSAGE_MAX_LENGTH)
 	for {
+		client.Connection.SetDeadline(time.Now().Add(5 * time.Minute))
 		count, err := client.Connection.Read(bytes)
 		log.Logger.Info("get bytes from client ", bytes[:count])
 		if err != nil {
@@ -154,7 +156,7 @@ func MessageDelivery(client *Client) {
 						Content: message.MessageClientSend.Content,
 					},
 				}
-				bytesTmp, err := messageReceive.Marshal()
+				bytesTmp, err := messageReceive.MessageMarshal()
 				if err != nil {
 					log.Logger.Info("err", err)
 					return
@@ -180,19 +182,19 @@ func MessageDelivery(client *Client) {
 
 //BroadcastMessage 广播消息
 func BroadcastMessage(message *proto.MessageWarpper) {
-	bytes, err := message.Marshal()
+	bytes, err := message.MessageMarshal()
 	if err != nil {
 		logger.Info("err", err)
 		return
 	}
 
-	messageType := message.Type
-	if messageType != proto.COMMUNICATION_TYPE_ClientLogin ||
-		messageType != proto.COMMUNICATION_TYPE_ClientLogout ||
-		messageType != proto.COMMUNICATION_TYPE_ClientReceived {
-		logger.Info("invalid message type")
-		return
-	}
+	// messageType := message.Type
+	// if messageType == proto.COMMUNICATION_TYPE_ClientLogin ||
+	// 	messageType == proto.COMMUNICATION_TYPE_ClientLogout ||
+	// 	messageType == proto.COMMUNICATION_TYPE_ClientReceived {
+	// 	logger.Info("invalid message type")
+	// 	return
+	// }
 
 	pool.Locker.Lock()
 	for i := 0; i < len(pool.Clients); i++ {
@@ -204,7 +206,7 @@ func BroadcastMessage(message *proto.MessageWarpper) {
 //MessageInterpreter 获取包装壳
 func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
 	warpper := &proto.MessageWarpper{}
-	err := warpper.Unmarshal(bytes)
+	err := warpper.MessageUnmarshal(bytes)
 	if err != nil {
 		logger.Info("", err)
 		return nil
@@ -217,8 +219,8 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return nil, nil, err
 	}
-	bytes := make([]byte, MESSAGE_MAX_LENGTH)
-	var loginMessage proto.MessageWarpper
+	bytes := make([]byte, 20)
+	var loginMessage *proto.MessageWarpper
 	for i := 0; i < 3; i++ {
 		count, err := conn.Read(bytes)
 		if err != nil {
@@ -229,12 +231,31 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 		}
 		msg := MessageInterpreter(bytes[:count])
 		if msg.Type == proto.COMMUNICATION_TYPE_LoginRequest {
+			loginSuccessMessage := &proto.MessageWarpper{
+				Type: proto.COMMUNICATION_TYPE_LoginResponse,
+				MessageLoginResponse: &proto.MessageLoginResponse{
+					Succeed: true,
+				},
+			}
+			loginSuccessMessageBytes, err := loginSuccessMessage.MessageMarshal()
+			if err != nil {
+				log.Logger.Info("marshal login success message", err)
+				break
+			}
+			_, err = conn.Write(loginSuccessMessageBytes)
+			if err != nil {
+				log.Logger.Info("write success message", err)
+				break
+			}
+			loginMessage = msg
 			break
 		}
+		log.Logger.Info("login message type:", msg.Type)
 		if i == 2 {
 			LoginFault(client)
 			return nil, nil, errors.New("wrong login message")
 		}
+
 		time.Sleep(time.Second * 3)
 		continue
 	}
@@ -247,8 +268,10 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 	}
 	pool.Insert(client)
 	LoginSucceed(client)
+	time.Sleep(100 * time.Millisecond)
 	BroadcastClientLogin(client)
-	return client, &loginMessage, nil
+	log.Logger.Info("client login :", client.Address, client.Name, client.Id)
+	return client, loginMessage, nil
 }
 
 //BroadcastClientLogin 广播用户登入
@@ -272,7 +295,7 @@ func LoginSucceed(client *Client) error {
 			Succeed: true,
 		},
 	}
-	bytes, err := loginResponseMessage.Marshal()
+	bytes, err := loginResponseMessage.MessageMarshal()
 	if err != nil {
 		return err
 	}
@@ -288,7 +311,7 @@ func LoginFault(client *Client) error {
 			Succeed: false,
 		},
 	}
-	bytes, err := loginResponseMessage.Marshal()
+	bytes, err := loginResponseMessage.MessageMarshal()
 	if err != nil {
 		return err
 	}
@@ -324,7 +347,7 @@ func LogoutSucceed(client *Client) error {
 			Succeed: true,
 		},
 	}
-	bytes, err := logoutMessage.Marshal()
+	bytes, err := logoutMessage.MessageMarshal()
 	if err != nil {
 		return err
 	}
@@ -340,7 +363,7 @@ func LogoutFault(client *Client) error {
 			Succeed: false,
 		},
 	}
-	bytes, err := logoutMessage.Marshal()
+	bytes, err := logoutMessage.MessageMarshal()
 	if err != nil {
 		return err
 	}

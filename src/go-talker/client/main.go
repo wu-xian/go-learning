@@ -54,14 +54,14 @@ func main() {
 		return
 	}
 
+	log.Logger.Info("login successsssssssssss")
+
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
 	go func() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
 	}()
-
-	Logout(connection)
 
 	_ = <-stopIt
 	//terminal.LoopClientUI(message)
@@ -92,7 +92,7 @@ func MessageReceiver(conn *net.TCPConn) {
 			}
 		default:
 			{
-				fmt.Println("default message")
+				fmt.Println("default message.", message.Type)
 			}
 		}
 	}
@@ -100,14 +100,16 @@ func MessageReceiver(conn *net.TCPConn) {
 
 func MessagePublisher(conn *net.TCPConn) {
 	for {
-		content := <-message
+		// content := <-message
+		content := ""
+		fmt.Scanln(&content)
 		message := proto.MessageWarpper{
 			Type: proto.COMMUNICATION_TYPE_ClientSend,
 			MessageClientSend: &proto.MessageClientSend{
 				Content: content,
 			},
 		}
-		bytess, err := message.Marshal()
+		bytess, err := message.MessageMarshal()
 		log.Logger.Info("get bytes ", bytess)
 		if err != nil {
 			return
@@ -124,7 +126,7 @@ func MessagePublisher(conn *net.TCPConn) {
 //MessageInterpreter 获取包装壳
 func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
 	warpper := &proto.MessageWarpper{}
-	err := warpper.Unmarshal(bytes)
+	err := warpper.MessageUnmarshal(bytes)
 	if err != nil {
 		log.Logger.Info("", err)
 		return nil
@@ -134,16 +136,14 @@ func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
 
 //Login 客户端登陆
 func Login(conn *net.TCPConn) error {
-	loginMessage := &proto.MessageWarpper{
+	loginMessage := proto.MessageWarpper{
 		Type: proto.COMMUNICATION_TYPE_LoginRequest,
 		MessageLoginRequest: &proto.MessageLoginRequest{
 			Name:  UName,
 			Token: "",
 		},
 	}
-	log.Logger.Info("before marshal", loginMessage.Type, loginMessage.MessageLoginRequest.Name)
-	bytes, err := loginMessage.Marshal()
-	log.Logger.Info("end marshal")
+	bytes, err := loginMessage.MessageMarshal()
 	if err != nil {
 		log.Logger.Info("", err)
 		return err
@@ -155,19 +155,21 @@ func Login(conn *net.TCPConn) error {
 			return errors.New("message too large")
 		}
 
-		readBytes := make([]byte, 0)
+		readBytes := make([]byte, 20)
 		count, err = conn.Read(readBytes)
 		msg := MessageInterpreter(readBytes[:count])
+		log.Logger.Info("", readBytes[:count])
 		if msg.Type == proto.COMMUNICATION_TYPE_LoginResponse &&
 			msg.MessageLoginResponse.Succeed {
 			break
 		}
+		log.Logger.Info("", msg)
 		if i == 2 {
 			return errors.New("wrong login message")
 		}
 		time.Sleep(time.Second * 3)
 	}
-
+	log.Logger.Info("login succeeded")
 	return nil
 }
 
@@ -177,7 +179,7 @@ func Logout(conn *net.TCPConn) error {
 		Type:                 proto.COMMUNICATION_TYPE_LogoutRequest,
 		MessageLogoutRequest: &proto.MessageLogoutRequest{},
 	}
-	bytes, err := logoutMessage.Marshal()
+	bytes, err := logoutMessage.MessageMarshal()
 	if err != nil {
 		log.Logger.Info("", err)
 		return err

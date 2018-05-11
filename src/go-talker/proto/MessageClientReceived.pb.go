@@ -8,10 +8,10 @@ import (
 	p "github.com/golang/protobuf/proto"
 )
 
-func (self *MessageClientReceived) Marshal() ([]byte, error) {
+func (self *MessageClientReceived) MessageMarshal() ([]byte, error) {
 	return p.Marshal(self)
 }
 
-func (self *MessageClientReceived) Unmarshal(bytes []byte) error {
+func (self *MessageClientReceived) MessageUnmarshal(bytes []byte) error {
 	return p.Unmarshal(bytes, self)
 }
