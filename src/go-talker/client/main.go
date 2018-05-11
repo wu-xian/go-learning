@@ -141,7 +141,9 @@ func Login(conn *net.TCPConn) error {
 			Token: "",
 		},
 	}
+	log.Logger.Info("before marshal", loginMessage.Type, loginMessage.MessageLoginRequest.Name)
 	bytes, err := loginMessage.Marshal()
+	log.Logger.Info("end marshal")
 	if err != nil {
 		log.Logger.Info("", err)
 		return err
@@ -164,7 +166,6 @@ func Login(conn *net.TCPConn) error {
 			return errors.New("wrong login message")
 		}
 		time.Sleep(time.Second * 3)
-		continue
 	}
 
 	return nil

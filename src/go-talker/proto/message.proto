@@ -17,15 +17,15 @@ enum COMMUNICATION_TYPE{
 
 //消息壳
 message MessageWarpper{
-    COMMUNICATION_TYPE Type = 1;//消息类型
-    MessageLoginRequest MessageLoginRequest =2 ;//客户端登陆响应
-    MessageLoginResponse MessageLoginResponse = 3;//客户端登陆响应
-    MessageLogoutRequest MessageLogoutRequest =4;//客户端登出请求
-    MessageLogoutResponse MessageLogoutResponse =5;//客户端登出响应
-    MessageClientLogin MessageClientLogin=6;//其他客户端登陆
-    MessageClientLogout MessageClientLogout=7;//其他客户端登出
-    MessageClientReceived MessageClientReceived=8;//客户端接收消息
-    MessageClientSend MessageClientSend=9;//客户端发送消息
+    repeated COMMUNICATION_TYPE Type = 1;//消息类型
+    repeated MessageLoginRequest MessageLoginRequest =2 ;//客户端登陆响应
+    repeated MessageLoginResponse MessageLoginResponse = 3;//客户端登陆响应
+    repeated MessageLogoutRequest MessageLogoutRequest =4;//客户端登出请求
+    repeated MessageLogoutResponse MessageLogoutResponse =5;//客户端登出响应
+    repeated MessageClientLogin MessageClientLogin=6;//其他客户端登陆
+    repeated MessageClientLogout MessageClientLogout=7;//其他客户端登出
+    repeated MessageClientReceived MessageClientReceived=8;//客户端接收消息
+    repeated MessageClientSend MessageClientSend=9;//客户端发送消息
 }
 
 //客户端登入请求

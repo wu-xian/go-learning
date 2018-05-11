@@ -14,8 +14,6 @@ import (
 
 	"learn/src/go-talker/proto"
 
-	"learn/src/go-talker/common"
-
 	"github.com/astaxie/beego/logs"
 	cli "github.com/urfave/cli"
 )
@@ -212,67 +210,6 @@ func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
 		return nil
 	}
 	return warpper
-	// switch warpper.Type {
-
-	// //客户端登陆请求
-	// case 0:
-	// 	{
-	// 		lm := proto.LoginMessage{}
-	// 		lm.Unmarshal(bytes)
-	// 		msg = lm
-	// 	}
-
-	// 	//客户端登陆响应
-	// case 1:
-	// 	{
-	// 		lm := proto.LogoutMessage{}
-	// 		lm.Unmarshal(bytes)
-	// 		msg = lm
-	// 	}
-
-	// 	//客户端登出请求
-	// case 2:
-	// 	{
-	// 		c := proto.Content{}
-	// 		c.Unmarshal(bytes)
-	// 		msg = c
-	// 	}
-
-	// 	//客户端登出响应
-	// case 3:
-	// 	{
-
-	// 	}
-
-	// //其他客户端登陆
-	// case 4:
-	// 	{
-
-	// 	}
-	// 	//其他客户端登出
-	// case 5:
-	// 	{
-
-	// 	}
-
-	// //客户端接收消息
-	// case 6:
-	// 	{
-
-	// 	}
-
-	// //客户端发送消息
-	// case 7:
-	// 	{
-
-	// 	}
-
-	// default:
-	// 	{
-	// 		return nil
-	// 	}
-	// }
-	// return msg
 }
 
 //Login 用户登入
@@ -283,8 +220,10 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 	bytes := make([]byte, MESSAGE_MAX_LENGTH)
 	var loginMessage proto.MessageWarpper
 	for i := 0; i < 3; i++ {
-		count, err := conn.Read(bytes[:])
-		common.CheckError(err)
+		count, err := conn.Read(bytes)
+		if err != nil {
+			return nil, nil, err
+		}
 		if count >= MESSAGE_MAX_LENGTH {
 			return nil, nil, errors.New("message too large")
 		}
