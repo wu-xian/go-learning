@@ -22,3 +22,118 @@
 2018/05/12 00:09:58.869 [I] get bytes %!(EXTRA []uint8=[8 7 74 12 10 10 120 120 120 120 120 120 120 120 120 120])
 2018/05/12 00:10:00.371 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
 2018/05/12 00:10:00.377 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 00:14:50.230 [I] has been connected to the server...
+2018/05/12 00:14:50.231 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 00:14:50.231 [I] login succeeded
+2018/05/12 00:14:50.231 [I] login successsssssssssss
+2018/05/12 00:14:53.925 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 00:14:56.796 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 115 97])
+2018/05/12 00:14:57.812 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 00:14:58.844 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 100 100])
+2018/05/12 00:15:17.799 [I] has been connected to the server...
+2018/05/12 00:15:17.800 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 00:15:17.800 [I] login succeeded
+2018/05/12 00:15:17.800 [I] login successsssssssssss
+2018/05/12 00:15:19.884 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 00:15:20.716 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 100 100])
+2018/05/12 00:15:21.412 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 102 102 102])
+2018/05/12 00:15:22.372 [I] get bytes %!(EXTRA []uint8=[8 7 74 4 10 2 120 120])
+2018/05/12 00:15:26.309 [I] get bytes %!(EXTRA []uint8=[8 7 74 9 10 7 97 115 100 97 100 115 100])
+2018/05/12 00:15:28.949 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 97 115 100 97 115 100 97 115 100])
+2018/05/12 00:15:30.301 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 00:15:31.406 [I] get bytes %!(EXTRA []uint8=[8 7 74 7 10 5 115 102 100 103 100])
+2018/05/12 00:15:31.740 [I] get bytes %!(EXTRA []uint8=[8 7 74 4 10 2 104 102])
+2018/05/12 00:15:32.028 [I] get bytes %!(EXTRA []uint8=[8 7 74 6 10 4 103 104 102 103])
+2018/05/12 00:15:32.332 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 104 102 103])
+2018/05/12 00:16:10.860 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 00:16:10.866 [I] %!(EXTRA *errors.errorString=unexpected EOF)
+2018/05/12 00:16:10.867 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 08:55:21.051 [I] has been connected to the server...
+2018/05/12 08:55:21.093 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 08:55:21.093 [I] login succeeded
+2018/05/12 08:55:21.093 [I] login successsssssssssss
+2018/05/12 08:55:28.768 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 08:55:30.408 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 100 100])
+2018/05/12 08:55:31.296 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 102 102 102])
+2018/05/12 08:55:32.449 [I] get bytes %!(EXTRA []uint8=[8 7 74 8 10 6 120 120 120 120 120 120])
+2018/05/12 08:55:56.340 [I] has been connected to the server...
+2018/05/12 08:55:56.341 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 08:55:56.341 [I] login succeeded
+2018/05/12 08:55:56.341 [I] login successsssssssssss
+2018/05/12 08:56:09.017 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 08:56:09.672 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 115 97])
+2018/05/12 08:56:10.842 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 120 120 120 120 120 120 120 120 120])
+2018/05/12 08:56:12.081 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 100 100 100 100 100 100 100 100 100])
+2018/05/12 08:56:13.202 [I] get bytes %!(EXTRA []uint8=[8 7 74 12 10 10 102 102 102 102 102 102 102 102 102 102])
+2018/05/12 08:56:14.233 [I] get bytes %!(EXTRA []uint8=[8 7 74 9 10 7 120 120 120 120 120 120 120])
+2018/05/12 08:56:16.323 [I] get bytes %!(EXTRA []uint8=[8 7 74 38 10 36 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118 118])
+2018/05/12 08:56:18.505 [I] get bytes %!(EXTRA []uint8=[8 7 74 9 10 7 104 97 104 97 104 104 97])
+2018/05/12 08:56:20.529 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 228 189 160 229 165 189 229 149 138])
+2018/05/12 08:56:24.993 [I] get bytes %!(EXTRA []uint8=[8 7 74 14 10 12 228 189 160 229 156 168 229 185 178 229 152 155])
+2018/05/12 08:56:32.729 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 230 136 145 229 190 136 229 165 189])
+2018/05/12 08:56:36.801 [I] get bytes %!(EXTRA []uint8=[8 7 74 8 10 6 228 189 160 229 145 162])
+2018/05/12 08:56:45.679 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 08:56:45.681 [I] %!(EXTRA *errors.errorString=unexpected EOF)
+2018/05/12 08:56:45.681 [I] %!(EXTRA *errors.errorString=unexpected EOF)
+2018/05/12 09:12:57.692 [I] has been connected to the server...
+2018/05/12 09:12:57.693 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 09:12:57.693 [I] login succeeded
+2018/05/12 09:12:57.693 [I] login successsssssssssss
+2018/05/12 09:12:57.693 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:13:02.673 [I] has been connected to the server...
+2018/05/12 09:13:02.673 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 09:13:02.673 [I] login succeeded
+2018/05/12 09:13:02.673 [I] login successsssssssssss
+2018/05/12 09:13:02.673 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:13:05.002 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 115 115 115])
+2018/05/12 09:13:07.946 [I] get bytes %!(EXTRA []uint8=[8 7 74 20 10 18 230 176 180 230 176 180 230 176 180 230 176 180 230 176 180 230 176 180])
+2018/05/12 09:13:10.384 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:13:10.384 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=ClientLogout)
+2018/05/12 09:13:10.384 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=ClientLogout)
+2018/05/12 09:13:10.384 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=ClientLogout)
+2018/05/12 09:13:10.384 [I] %!(EXTRA *errors.errorString=unexpected EOF)
+2018/05/12 09:13:10.384 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:13:10.384 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 09:15:28.048 [I] has been connected to the server...
+2018/05/12 09:15:28.049 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 09:15:28.049 [I] login succeeded
+2018/05/12 09:15:28.049 [I] login successsssssssssss
+2018/05/12 09:15:28.049 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:15:30.705 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 97 97])
+2018/05/12 09:15:32.234 [I] get bytes %!(EXTRA []uint8=[8 7 74 7 10 5 97 97 97 97 97])
+2018/05/12 09:15:33.418 [I] get bytes %!(EXTRA []uint8=[8 7 74 10 10 8 97 97 97 97 97 97 97 97])
+2018/05/12 09:15:34.889 [I] get bytes %!(EXTRA []uint8=[8 7 74 10 10 8 97 97 97 97 97 97 97 97])
+2018/05/12 09:15:36.106 [I] get bytes %!(EXTRA []uint8=[8 7 74 9 10 7 97 97 97 97 97 97 97])
+2018/05/12 09:15:39.154 [I] get bytes %!(EXTRA []uint8=[8 7 74 17 10 15 229 147 136 229 147 136 229 147 136 229 147 136 229 147 136])
+2018/05/12 09:15:40.762 [I] get bytes %!(EXTRA []uint8=[8 7 74 11 10 9 228 189 160 229 165 189 229 149 138])
+2018/05/12 09:15:42.513 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:15:42.520 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=ClientLogout)
+2018/05/12 09:15:42.520 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:15:42.520 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 09:15:44.379 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:26:34.498 [I] has been connected to the server...
+2018/05/12 09:26:34.500 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 09:26:34.500 [I] login succeeded
+2018/05/12 09:26:34.500 [I] login successsssssssssss
+2018/05/12 09:26:34.500 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:26:36.312 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 09:26:37.120 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 100 115 97])
+2018/05/12 09:26:39.296 [I] get bytes %!(EXTRA []uint8=[8 7 74 6 10 4 115 115 115 115])
+2018/05/12 09:26:42.129 [I] get bytes %!(EXTRA []uint8=[8 7 74 8 10 6 229 147 136 229 150 189])
+2018/05/12 09:26:43.170 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:26:43.183 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LogoutResponse)
+2018/05/12 09:26:43.183 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:26:43.183 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 09:26:46.704 [I] get bytes %!(EXTRA []uint8=[8 7 74 4 10 2 122 99])
+2018/05/12 09:27:01.931 [I] has been connected to the server...
+2018/05/12 09:27:01.932 [I] %!(EXTRA []uint8=[8 1 26 2 8 1])
+2018/05/12 09:27:01.932 [I] login succeeded
+2018/05/12 09:27:01.932 [I] login successsssssssssss
+2018/05/12 09:27:01.932 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:27:03.936 [I] get bytes %!(EXTRA []uint8=[8 7 74 5 10 3 97 115 100])
+2018/05/12 09:27:04.983 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:27:04.984 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=ClientLogout)
+2018/05/12 09:27:04.984 [I] default message.%!(EXTRA proto.COMMUNICATION_TYPE=LoginResponse)
+2018/05/12 09:27:04.984 [I] unable to read message%!(EXTRA *errors.errorString=EOF)
+2018/05/12 09:27:06.136 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])
+2018/05/12 09:27:06.717 [I] get bytes %!(EXTRA []uint8=[8 7 74 0])

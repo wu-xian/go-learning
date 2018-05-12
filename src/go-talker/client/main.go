@@ -54,8 +54,6 @@ func main() {
 		return
 	}
 
-	log.Logger.Info("login successsssssssssss")
-
 	go MessageReceiver(connection)
 	go MessagePublisher(connection)
 
@@ -66,7 +64,7 @@ func main() {
 	_ = <-stopIt
 	//terminal.LoopClientUI(message)
 
-	Logout(connection)
+	_ = Logout(connection)
 	connection.CloseRead()
 	fmt.Println("application stopped")
 }
@@ -88,11 +86,17 @@ func MessageReceiver(conn *net.TCPConn) {
 		switch message.Type {
 		case proto.COMMUNICATION_TYPE_ClientReceived:
 			{
-				fmt.Println(message.MessageClientReceived.Content)
+				formattedMessage := fmt.Sprintf("[%s]:%s", message.MessageClientReceived.Name, message.MessageClientReceived.Content)
+				fmt.Println(formattedMessage)
+			}
+		case proto.COMMUNICATION_TYPE_ClientLogin:
+			{
+				formattedMessage := fmt.Sprintf("==>[%s] Login!", message.MessageClientLogin.Name)
+				fmt.Println(formattedMessage)
 			}
 		default:
 			{
-				fmt.Println("default message.", message.Type)
+				log.Logger.Info("default message.", message.Type)
 			}
 		}
 	}
@@ -186,7 +190,9 @@ func Logout(conn *net.TCPConn) error {
 	}
 	for i := 0; i < 3; i++ {
 		count, err := conn.Write(bytes)
-		common.CheckError(err)
+		if err != nil {
+			return errors.New("logout")
+		}
 		if count >= MESSAGE_MAX_LENGTH {
 			return errors.New("message too large")
 		}

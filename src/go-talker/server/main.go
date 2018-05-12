@@ -93,6 +93,9 @@ func startAction(ctx *cli.Context) {
 	go func(_listener net.Listener) {
 		for {
 			rawConn, _ := _listener.Accept()
+			if rawConn == nil {
+				return
+			}
 			conn := rawConn.(*net.TCPConn)
 			fmt.Println("open connection:", conn.RemoteAddr())
 			go func(_conn *net.TCPConn) {
@@ -107,6 +110,8 @@ func startAction(ctx *cli.Context) {
 					log.Logger.Info("wrong message")
 					return
 				}
+
+				fmt.Println("client login ", client.Id, client.Address.String(), client.Name)
 
 				//broadcast
 				MessageDelivery(client)
@@ -164,9 +169,6 @@ func MessageDelivery(client *Client) {
 				pool.Locker.Lock()
 				for i := 0; i < len(pool.Clients); i++ {
 					currentClient := pool.Clients[i]
-					if currentClient.Id == client.Id {
-						continue
-					}
 					currentClient.Connection.Write(bytesTmp)
 				}
 				pool.Locker.Unlock()
