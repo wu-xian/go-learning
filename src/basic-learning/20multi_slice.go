@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func main20() {
 	h, w := 2, 4
 
 	raw := make([]int, h*w)
