@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func main21() {
 	var value uint8 = 0x08
 	fmt.Printf("%o \n", value)
 
