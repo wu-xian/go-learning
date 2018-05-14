@@ -12,6 +12,7 @@ func main() {
 		defer fmt.Println("Done?")
 		for m := range ch {
 			defer fmt.Println("defer:", m) //won't work
+			//fmt.Println(m, ok)
 			time.Sleep(1 * time.Second)
 			fmt.Println("processed:", m)
 		}
