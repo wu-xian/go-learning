@@ -65,7 +65,7 @@ func (self *InputBox) Buffer() *termui.Buffer {
 }
 
 func (self *InputBox) ListenInput(message chan string) {
-	termui.On(Word, "<space>", func(e termui.Event) {
+	termui.On(Word, func(e termui.Event) {
 		self.keyDown(e.Key)
 	})
 
