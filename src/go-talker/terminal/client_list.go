@@ -7,12 +7,11 @@ import (
 )
 
 type ClientList struct {
-	termui.Block
-	Text        string
-	TextLine    int
-	TextFgColor int
-	TextBgColor int
-	WrapLength  int
+	*termui.Block
+	InChan       chan *Client
+	OutChan      chan *Client
+	clients      []*Client
+	clientLocker sync.Mutex
 }
 
 type Client struct {
@@ -20,55 +19,42 @@ type Client struct {
 	Name string
 }
 
-var (
-	clients      []Client = []Client{Client{Id: 2, Name: "222"}, Client{Id: 3, Name: "333"}}
-	clientLocker sync.Mutex
-	inChan       chan *Client = make(chan *Client, 0)
-	outChan      chan *Client = make(chan *Client, 0)
-)
-
-func Add(client *Client) {
-	clientLocker.Lock()
-	defer clientLocker.Unlock()
-	clients = append(clients, *client)
-	inChan <- client
+func (self *ClientList) Add(client *Client) {
+	self.clientLocker.Lock()
+	self.clients = append(self.clients, client)
+	self.clientLocker.Unlock()
+	self.InChan <- client
 }
 
-func Remove(client *Client) {
-	clientLocker.Lock()
-	defer clientLocker.Unlock()
+func (self *ClientList) Remove(client *Client) {
+	self.clientLocker.Lock()
 	index := -1
-	for i, v := range clients {
+	for i, v := range self.clients {
 		if v.Id == client.Id {
 			index = i
 			break
 		}
 	}
-
-	clients = append(clients[:index], clients[index+1:]...)
-	outChan <- client
+	self.clients = append(self.clients[:index], self.clients[index+1:]...)
+	self.clientLocker.Unlock()
+	self.OutChan <- client
 }
 
-// ListenToServer ?
-func ListenToServer() {
-	go func() {
-		select {
-		case _ = <-inChan:
-			{
-				termui.Render(termui.Body)
-			}
-		case _ = <-outChan:
-			{
-				termui.Render(termui.Body)
-			}
-		}
-	}()
+func NewClientList() *ClientList {
+	return &ClientList{
+		Block:   termui.NewBlock(),
+		OutChan: make(chan *Client, 0),
+		InChan:  make(chan *Client, 0),
+		clients: []*Client{},
+	}
 }
 
 func (self *ClientList) Buffer() *termui.Buffer {
-	buf := self.Buffer()
-	for i, v := range clients {
-		buf.SetString(3, 3*i, v.Name, 35, 47)
+	buf := self.Block.Buffer()
+	self.clientLocker.Lock()
+	for i, v := range self.clients {
+		buf.SetString(3, 2*(i+1), v.Name, 35, 47)
 	}
+	self.clientLocker.Unlock()
 	return buf
 }

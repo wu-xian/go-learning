@@ -25,6 +25,6 @@ var (
 
 func (self *MessageList) Buffer() *termui.Buffer {
 	buf := self.Buffer()
-	c1 := termui.NewCell()
+	//c1 := termui.NewCell()
 	return buf
 }

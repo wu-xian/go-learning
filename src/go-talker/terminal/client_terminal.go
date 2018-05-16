@@ -13,14 +13,16 @@ func LoopClientUI(message chan string) {
 
 	ui.Body.Cols = 12
 	ui.Body.Rows = 12
-	input_box := NewInputBox()
+	//input_box := NewInputBox()
+	input_box := ui.NewBlock()
 	input_box.XOffset = 9
 	input_box.X = 12
 	input_box.BorderBg = 7
 	//input_box.Label = "Message"
-	input_box.ListenInput(message)
+	//input_box.ListenInput(message)
 
-	client_list := ui.NewBlock()
+	client_list := NewClientList()
+	//client_list := ui.NewBlock()
 	client_list.BorderBg = 7
 
 	message_list := ui.NewBlock()
@@ -36,18 +38,44 @@ func LoopClientUI(message chan string) {
 		ui.StopLoop()
 	})
 
-	resizeChan := make(chan bool, 2)
-	go func(c chan bool) {
+	//resizeChan := make(chan bool, 0)
+	// go func(c chan bool) {
+	// 	for {
+	// 		_ = <-c
+	// 		ui.Render(ui.Body)
+	// 	}
+	// }(resizeChan)
+
+	go func() {
 		for {
-			_ = <-c
-			ui.Render(ui.Body)
+			select {
+			case _ = <-client_list.InChan:
+				{
+					ui.Render(ui.Body)
+				}
+			case _ = <-client_list.OutChan:
+				{
+					ui.Render(ui.Body)
+				}
+			}
 		}
-	}(resizeChan)
+	}()
+
+	var ii int32 = 4
+	ui.On("a", func(e ui.Event) {
+		client_list.Add(&Client{
+			Id:   ii,
+			Name: "23333",
+		})
+		ii++
+	})
+
 	ui.On("<resize>", func(e ui.Event) {
+		ui.Clear()
 		ui.Body.Width, ui.Body.Height = e.Width, e.Height
 		ui.Body.Resize()
-		ui.Clear()
-		resizeChan <- true
+		ui.Render(ui.Body)
+		//resizeChan <- true
 	})
 
 	ui.Loop()
