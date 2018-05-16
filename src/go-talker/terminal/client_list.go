@@ -21,7 +21,7 @@ type Client struct {
 }
 
 var (
-	clients      []Client
+	clients      []Client = []Client{Client{Id: 2, Name: "222"}, Client{Id: 3, Name: "333"}}
 	clientLocker sync.Mutex
 	inChan       chan *Client = make(chan *Client, 0)
 	outChan      chan *Client = make(chan *Client, 0)
