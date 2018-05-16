@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"learn/src/go-talker/common"
 	"learn/src/go-talker/proto"
+	"learn/src/go-talker/terminal"
 	"net"
 	"os"
 	"os/signal"
@@ -29,8 +30,8 @@ var (
 const MESSAGE_MAX_LENGTH = 2048
 
 func main() {
-	//terminal.LoopClientUI(message)
-	//return
+	terminal.LoopClientUI(message)
+	return
 	err := Init()
 	if err != nil {
 		fmt.Println(err)
