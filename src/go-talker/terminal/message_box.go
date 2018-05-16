@@ -10,7 +10,6 @@ import (
 
 type MessageList struct {
 	*termui.Table
-	termui.Block
 	Text        string
 	TextLine    int
 	TextFgColor int
@@ -23,8 +22,14 @@ var (
 	messageChan   chan *proto.MessageWarpper = make(chan *proto.MessageWarpper, 0)
 )
 
+func NewMessageList() *MessageList {
+	return &MessageList{
+		Table: termui.NewTable(),
+	}
+}
+
 func (self *MessageList) Buffer() *termui.Buffer {
-	buf := self.Buffer()
+	buf := self.Table.Buffer()
 	//c1 := termui.NewCell()
 	return buf
 }
