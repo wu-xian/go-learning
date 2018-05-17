@@ -25,7 +25,7 @@ func LoopClientUI(message chan string) {
 	//client_list := ui.NewBlock()
 	client_list.BorderBg = 7
 
-	message_list := ui.NewBlock()
+	message_list := NewMessageBox()
 	message_list.BorderBg = 7
 
 	ui.Body.Set(0, 0, 4, 12, client_list)

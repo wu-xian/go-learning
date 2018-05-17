@@ -3,33 +3,82 @@ package terminal
 import (
 	"sync"
 
-	"learn/src/go-talker/proto"
-
 	"github.com/cjbassi/termui"
 )
 
-type MessageList struct {
-	*termui.Table
-	Text        string
-	TextLine    int
-	TextFgColor int
-	TextBgColor int
-	WrapLength  int
+type MessageBox struct {
+	*termui.Block
+	Messages    []Message
+	Boxes       []Box
+	MessageChan chan *Message
+	locker      sync.Mutex
+	showIndex   int32
+	lastIndex   int32
 }
 
-var (
-	messageLocker sync.Mutex
-	messageChan   chan *proto.MessageWarpper = make(chan *proto.MessageWarpper, 0)
-)
+func (self *MessageBox) AddMessage(message Message) {
+	self.locker.Lock()
+	self.Messages = append(self.Messages, message)
+	self.locker.Unlock()
+}
 
-func NewMessageList() *MessageList {
-	return &MessageList{
-		Table: termui.NewTable(),
+func NewMessageBox() *MessageBox {
+	return &MessageBox{
+		Block: termui.NewBlock(),
+		Messages: []Message{Message{Content: "1111"},
+			Message{Content: "22"},
+			Message{Content: "3333333"},
+			Message{Content: "44444444"},
+			Message{Content: "5555"},
+			Message{Content: "666"},
+			Message{Content: "777"},
+			Message{Content: "888"},
+			Message{Content: "999"},
+			Message{Content: "000"},
+			Message{Content: "111"},
+			Message{Content: "222"},
+			Message{Content: "333"},
+			Message{Content: "444"},
+			Message{Content: "5555"},
+		},
+		Boxes:       make([]Box, 0),
+		MessageChan: make(chan *Message, 0),
 	}
 }
 
-func (self *MessageList) Buffer() *termui.Buffer {
-	buf := self.Table.Buffer()
-	//c1 := termui.NewCell()
+type Message struct {
+	Content string //消息内容
+	Name    string //消息发送者名称
+	Time    int64  //发送消息时间
+}
+
+type Box struct {
+	message *Message
+	index   int32
+}
+
+func NewMessageList() *MessageBox {
+	return &MessageBox{
+		Block: termui.NewBlock(),
+	}
+}
+
+func (self *MessageBox) Buffer() *termui.Buffer {
+	self.locker.Lock()
+	buf := self.Block.Buffer()
+	y := self.Block.Y
+	y2 := y/2 - 1
+	if len(self.Messages) > y2 {
+		i := len(self.Messages) - y2
+		shown := self.Messages[i:]
+		for _i, _v := range shown {
+			buf.SetString(2, 2+2*_i, _v.Content, 35, 47)
+		}
+	} else {
+		for _i, _v := range self.Messages {
+			buf.SetString(2, 2+2*_i, _v.Content, 35, 47)
+		}
+	}
+	self.locker.Unlock()
 	return buf
 }
