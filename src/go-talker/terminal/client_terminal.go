@@ -1,10 +1,12 @@
 package terminal
 
 import (
+	"learn/src/go-talker/proto"
+
 	ui "github.com/cjbassi/termui"
 )
 
-func LoopClientUI(message chan string) {
+func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan chan string) {
 	if err := ui.Init(); err != nil {
 		panic(err)
 	}
@@ -13,24 +15,21 @@ func LoopClientUI(message chan string) {
 
 	ui.Body.Cols = 12
 	ui.Body.Rows = 12
-	//input_box := NewInputBox()
-	input_box := ui.NewBlock()
-	input_box.XOffset = 9
-	input_box.X = 12
-	input_box.BorderBg = 7
-	//input_box.Label = "Message"
-	//input_box.ListenInput(message)
 
-	client_list := NewClientList()
-	//client_list := ui.NewBlock()
-	client_list.BorderBg = 7
+	inputBox := NewInputBox()
+	inputBox.XOffset = 9
+	inputBox.X = 12
+	inputBox.BorderBg = 7
 
-	message_list := NewMessageBox()
-	message_list.BorderBg = 7
+	clientList := NewClientList()
+	clientList.BorderBg = 7
 
-	ui.Body.Set(0, 0, 4, 12, client_list)
-	ui.Body.Set(4, 0, 12, 8, message_list)
-	ui.Body.Set(4, 8, 12, 12, input_box)
+	messageList := NewMessageBox()
+	messageList.BorderBg = 7
+
+	ui.Body.Set(0, 0, 4, 12, clientList)
+	ui.Body.Set(4, 0, 12, 8, messageList)
+	ui.Body.Set(4, 8, 12, 12, inputBox)
 
 	ui.Render(ui.Body)
 
@@ -38,22 +37,14 @@ func LoopClientUI(message chan string) {
 		ui.StopLoop()
 	})
 
-	//resizeChan := make(chan bool, 0)
-	// go func(c chan bool) {
-	// 	for {
-	// 		_ = <-c
-	// 		ui.Render(ui.Body)
-	// 	}
-	// }(resizeChan)
-
 	go func() {
 		for {
 			select {
-			case _ = <-client_list.InChan:
+			case _ = <-clientList.InChan:
 				{
 					ui.Render(ui.Body)
 				}
-			case _ = <-client_list.OutChan:
+			case _ = <-clientList.OutChan:
 				{
 					ui.Render(ui.Body)
 				}
@@ -61,21 +52,39 @@ func LoopClientUI(message chan string) {
 		}
 	}()
 
-	var ii int32 = 4
-	ui.On("a", func(e ui.Event) {
-		client_list.Add(&Client{
-			Id:   ii,
-			Name: "23333",
-		})
-		ii++
-	})
+	go func() {
+		for {
+			message := <-messageChan
+			switch message.Type {
+			case proto.COMMUNICATION_TYPE_ClientLogin:
+				{
+					clientList.Add(&Client{
+						Id:   message.MessageClientLogin.Id,
+						Name: message.MessageClientLogin.Name,
+					})
+				}
+			case proto.COMMUNICATION_TYPE_ClientLogout:
+				{
+
+				}
+			case proto.COMMUNICATION_TYPE_ClientReceived:
+				{
+					messageList.AddMessage(Message{
+						Name:    message.MessageClientReceived.Name,
+						Content: message.MessageClientReceived.Content,
+					})
+				}
+			}
+		}
+	}()
+
+	inputBox.ListenInput(messagePublishChan)
 
 	ui.On("<resize>", func(e ui.Event) {
 		ui.Clear()
 		ui.Body.Width, ui.Body.Height = e.Width, e.Height
 		ui.Body.Resize()
 		ui.Render(ui.Body)
-		//resizeChan <- true
 	})
 
 	ui.Loop()

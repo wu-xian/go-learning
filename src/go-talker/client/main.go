@@ -18,20 +18,19 @@ import (
 )
 
 var (
-	IP         string
-	Port       int
-	UName      string
-	Key        string
-	connection *net.TCPConn
-	message    chan string    = make(chan string, 1)
-	stopIt     chan os.Signal = make(chan os.Signal, 1)
+	IP                 string
+	Port               int
+	UName              string
+	Key                string
+	connection         *net.TCPConn
+	messageChan        chan *proto.MessageWarpper = make(chan *proto.MessageWarpper, 0)
+	messagePublishChan chan string                = make(chan string, 0)
+	stopIt             chan os.Signal             = make(chan os.Signal, 1)
 )
 
 const MESSAGE_MAX_LENGTH = 2048
 
 func main() {
-	terminal.LoopClientUI(message)
-	return
 	err := Init()
 	if err != nil {
 		fmt.Println(err)
@@ -62,8 +61,8 @@ func main() {
 		signal.Notify(stopIt, os.Interrupt, os.Kill)
 	}()
 
+	terminal.LoopClientUI(messageChan, messagePublishChan)
 	_ = <-stopIt
-	//terminal.LoopClientUI(message)
 
 	_ = Logout(connection)
 	connection.CloseRead()
@@ -87,13 +86,15 @@ func MessageReceiver(conn *net.TCPConn) {
 		switch message.Type {
 		case proto.COMMUNICATION_TYPE_ClientReceived:
 			{
-				formattedMessage := fmt.Sprintf("[%s]:%s", message.MessageClientReceived.Name, message.MessageClientReceived.Content)
-				fmt.Println(formattedMessage)
+				messageChan <- message
 			}
 		case proto.COMMUNICATION_TYPE_ClientLogin:
 			{
-				formattedMessage := fmt.Sprintf("==>[%s] Login!", message.MessageClientLogin.Name)
-				fmt.Println(formattedMessage)
+				messageChan <- message
+			}
+		case proto.COMMUNICATION_TYPE_ClientLogout:
+			{
+				messageChan <- message
 			}
 		default:
 			{
@@ -105,9 +106,9 @@ func MessageReceiver(conn *net.TCPConn) {
 
 func MessagePublisher(conn *net.TCPConn) {
 	for {
-		// content := <-message
-		content := ""
-		fmt.Scanln(&content)
+		content := <-messagePublishChan
+		//content := ""
+		//fmt.Scanln(&content)
 		message := proto.MessageWarpper{
 			Type: proto.COMMUNICATION_TYPE_ClientSend,
 			MessageClientSend: &proto.MessageClientSend{

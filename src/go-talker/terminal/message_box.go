@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/cjbassi/termui"
@@ -72,13 +73,17 @@ func (self *MessageBox) Buffer() *termui.Buffer {
 		i := len(self.Messages) - y2
 		shown := self.Messages[i:]
 		for _i, _v := range shown {
-			buf.SetString(2, 2+2*_i, _v.Content, 35, 47)
+			buf.SetString(2, 2+2*_i, messageFormatter(_v.Name, _v.Content), 35, 47)
 		}
 	} else {
 		for _i, _v := range self.Messages {
-			buf.SetString(2, 2+2*_i, _v.Content, 35, 47)
+			buf.SetString(2, 2+2*_i, messageFormatter(_v.Name, _v.Content), 35, 47)
 		}
 	}
 	self.locker.Unlock()
 	return buf
+}
+
+func messageFormatter(name, content string) string {
+	return fmt.Sprintf("[%s]: %s", name, content)
 }
