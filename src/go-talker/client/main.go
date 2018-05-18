@@ -83,6 +83,7 @@ func MessageReceiver(conn *net.TCPConn) {
 			log.Logger.Info("invalid message:", err)
 			return
 		}
+		log.Logger.Info("messagereceiver get:", message)
 		switch message.Type {
 		case proto.COMMUNICATION_TYPE_ClientReceived:
 			{
@@ -107,6 +108,7 @@ func MessageReceiver(conn *net.TCPConn) {
 func MessagePublisher(conn *net.TCPConn) {
 	for {
 		content := <-messagePublishChan
+		log.Logger.Info("send content", content)
 		//content := ""
 		//fmt.Scanln(&content)
 		message := proto.MessageWarpper{
@@ -116,7 +118,7 @@ func MessagePublisher(conn *net.TCPConn) {
 			},
 		}
 		bytess, err := message.MessageMarshal()
-		log.Logger.Info("get bytes ", bytess)
+		log.Logger.Info("send bytes ", bytess)
 		if err != nil {
 			return
 		}

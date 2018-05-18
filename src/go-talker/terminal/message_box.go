@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"fmt"
+	"learn/src/go-talker/log"
 	"sync"
 
 	"github.com/cjbassi/termui"
@@ -12,6 +13,7 @@ type MessageBox struct {
 	Messages    []Message
 	Boxes       []Box
 	MessageChan chan *Message
+	InChan      chan *Message
 	locker      sync.Mutex
 	showIndex   int32
 	lastIndex   int32
@@ -21,27 +23,13 @@ func (self *MessageBox) AddMessage(message Message) {
 	self.locker.Lock()
 	self.Messages = append(self.Messages, message)
 	self.locker.Unlock()
+	self.InChan <- &message
 }
 
 func NewMessageBox() *MessageBox {
 	return &MessageBox{
-		Block: termui.NewBlock(),
-		Messages: []Message{Message{Content: "1111"},
-			Message{Content: "22"},
-			Message{Content: "3333333"},
-			Message{Content: "44444444"},
-			Message{Content: "5555"},
-			Message{Content: "666"},
-			Message{Content: "777"},
-			Message{Content: "888"},
-			Message{Content: "999"},
-			Message{Content: "000"},
-			Message{Content: "111"},
-			Message{Content: "222"},
-			Message{Content: "333"},
-			Message{Content: "444"},
-			Message{Content: "5555"},
-		},
+		Block:       termui.NewBlock(),
+		Messages:    []Message{},
 		Boxes:       make([]Box, 0),
 		MessageChan: make(chan *Message, 0),
 	}
@@ -65,19 +53,43 @@ func NewMessageList() *MessageBox {
 }
 
 func (self *MessageBox) Buffer() *termui.Buffer {
+	log.Logger.Info("bbbbbbbbbbbbb", len(self.Messages))
 	self.locker.Lock()
 	buf := self.Block.Buffer()
+	width := self.X - 4
 	y := self.Block.Y
 	y2 := y/2 - 1
 	if len(self.Messages) > y2 {
 		i := len(self.Messages) - y2
 		shown := self.Messages[i:]
 		for _i, _v := range shown {
-			buf.SetString(2, 2+2*_i, messageFormatter(_v.Name, _v.Content), 35, 47)
+			fmtMessage := messageFormatter(_v.Name, _v.Content)
+			if len(fmtMessage) > width {
+				firstLine := fmtMessage[:width+1]
+				secondLine := fmtMessage[width+1:]
+				if len(secondLine) > 2*width-4 {
+					secondLine = secondLine[width:2*width-4] + "…"
+				}
+				buf.SetString(2, 1+2*_i, firstLine, 35, 47)
+				buf.SetString(4, 2+2*_i, secondLine, 35, 47)
+			} else {
+				buf.SetString(2, 2+2*_i, fmtMessage, 35, 47)
+			}
 		}
 	} else {
 		for _i, _v := range self.Messages {
-			buf.SetString(2, 2+2*_i, messageFormatter(_v.Name, _v.Content), 35, 47)
+			fmtMessage := messageFormatter(_v.Name, _v.Content)
+			if len(fmtMessage) > width {
+				firstLine := fmtMessage[:width+1]
+				secondLine := fmtMessage[width+1:]
+				if len(secondLine) > 2*width-4 {
+					secondLine = secondLine[width:2*width-4] + "…"
+				}
+				buf.SetString(2, 1+2*_i, firstLine, 35, 47)
+				buf.SetString(4, 2+2*_i, secondLine, 35, 47)
+			} else {
+				buf.SetString(2, 2+2*_i, fmtMessage, 35, 47)
+			}
 		}
 	}
 	self.locker.Unlock()

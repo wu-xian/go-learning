@@ -3,6 +3,8 @@ package terminal
 import (
 	"learn/src/go-talker/proto"
 
+	"learn/src/go-talker/log"
+
 	ui "github.com/cjbassi/termui"
 )
 
@@ -24,11 +26,11 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	clientList := NewClientList()
 	clientList.BorderBg = 7
 
-	messageList := NewMessageBox()
-	messageList.BorderBg = 7
+	messageBox := NewMessageBox()
+	messageBox.BorderBg = 7
 
 	ui.Body.Set(0, 0, 4, 12, clientList)
-	ui.Body.Set(4, 0, 12, 8, messageList)
+	ui.Body.Set(4, 0, 12, 8, messageBox)
 	ui.Body.Set(4, 8, 12, 12, inputBox)
 
 	ui.Render(ui.Body)
@@ -48,6 +50,10 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 				{
 					ui.Render(ui.Body)
 				}
+			case _ = <-messageBox.InChan:
+				{
+					ui.Render(ui.Body)
+				}
 			}
 		}
 	}()
@@ -55,6 +61,7 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	go func() {
 		for {
 			message := <-messageChan
+			log.Logger.Info("get message , type:", message.Type)
 			switch message.Type {
 			case proto.COMMUNICATION_TYPE_ClientLogin:
 				{
@@ -65,14 +72,21 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 				}
 			case proto.COMMUNICATION_TYPE_ClientLogout:
 				{
-
+					clientList.Remove(&Client{
+						Id: message.MessageClientLogout.Id,
+					})
 				}
 			case proto.COMMUNICATION_TYPE_ClientReceived:
 				{
-					messageList.AddMessage(Message{
+					messageBox.AddMessage(Message{
 						Name:    message.MessageClientReceived.Name,
 						Content: message.MessageClientReceived.Content,
 					})
+				}
+			default:
+				{
+
+					log.Logger.Info("received:", message)
 				}
 			}
 		}
