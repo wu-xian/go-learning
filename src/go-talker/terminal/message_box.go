@@ -20,9 +20,9 @@ type MessageBox struct {
 }
 
 func (self *MessageBox) AddMessage(message Message) {
-	self.locker.Lock()
+	//self.locker.Lock()
 	self.Messages = append(self.Messages, message)
-	self.locker.Unlock()
+	//self.locker.Unlock()
 	self.InChan <- &message
 }
 
@@ -54,7 +54,7 @@ func NewMessageList() *MessageBox {
 
 func (self *MessageBox) Buffer() *termui.Buffer {
 	log.Logger.Info("bbbbbbbbbbbbb", len(self.Messages))
-	self.locker.Lock()
+	//self.locker.Lock()
 	buf := self.Block.Buffer()
 	width := self.X - 4
 	y := self.Block.Y
@@ -92,7 +92,7 @@ func (self *MessageBox) Buffer() *termui.Buffer {
 			}
 		}
 	}
-	self.locker.Unlock()
+	//self.locker.Unlock()
 	return buf
 }
 

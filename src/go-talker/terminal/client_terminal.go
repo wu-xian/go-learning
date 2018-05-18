@@ -52,6 +52,7 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 				}
 			case _ = <-messageBox.InChan:
 				{
+					log.Logger.Info("inchaninchaninchaninchaninchaninchaninchaninchan")
 					ui.Render(ui.Body)
 				}
 			}
