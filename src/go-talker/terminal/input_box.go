@@ -40,7 +40,7 @@ func NewInputBox() *InputBox {
 func (self *InputBox) Buffer() *termui.Buffer {
 	buf := self.Block.Buffer()
 	width := self.X - 4
-	log.Logger.Info("width,selfText:", width, self.Text)
+	y := self.Y - 2
 	if width <= 0 {
 		return buf
 	}
@@ -48,19 +48,18 @@ func (self *InputBox) Buffer() *termui.Buffer {
 		texts := make([]string, 0)
 		lost := self.Text
 		for ; len(lost) > width; lost = lost[width:] {
-			log.Logger.Info("lost len:", len(lost))
 			texts = append(texts, lost[:width+1])
 		}
 		texts = append(texts, lost)
 
 		for i, v := range texts {
-			buf.SetString(2, 2+i, v, 35, 47)
+			if i < y-2 {
+				buf.SetString(2, 2+i, v, 35, 47)
+			}
 		}
 	} else {
 		buf.SetString(2, 2, self.Text, 35, 47)
 	}
-
-	//log.Logger.Info("min,max:", self.Grid.Bounds().Min, self.Grid.Bounds().Max)
 	return buf
 }
 

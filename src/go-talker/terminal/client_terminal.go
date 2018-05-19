@@ -1,12 +1,16 @@
 package terminal
 
 import (
+	"fmt"
 	"learn/src/go-talker/proto"
+	"sync"
 
 	"learn/src/go-talker/log"
 
 	ui "github.com/cjbassi/termui"
 )
+
+var UILocker sync.Mutex
 
 func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan chan string) {
 	if err := ui.Init(); err != nil {
@@ -44,16 +48,21 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 			select {
 			case _ = <-clientList.InChan:
 				{
+					UILocker.Lock()
 					ui.Render(ui.Body)
+					UILocker.Unlock()
 				}
 			case _ = <-clientList.OutChan:
 				{
+					UILocker.Lock()
 					ui.Render(ui.Body)
+					UILocker.Unlock()
 				}
 			case _ = <-messageBox.InChan:
 				{
-					log.Logger.Info("inchaninchaninchaninchaninchaninchaninchaninchan")
+					UILocker.Lock()
 					ui.Render(ui.Body)
+					UILocker.Unlock()
 				}
 			}
 		}
@@ -96,11 +105,16 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	inputBox.ListenInput(messagePublishChan)
 
 	ui.On("<resize>", func(e ui.Event) {
+		UILocker.Lock()
 		ui.Clear()
 		ui.Body.Width, ui.Body.Height = e.Width, e.Height
 		ui.Body.Resize()
 		ui.Render(ui.Body)
+		UILocker.Unlock()
 	})
 
 	ui.Loop()
+	fmt.Println("application stopping")
+	UILocker.Lock()
+	UILocker.Unlock()
 }
