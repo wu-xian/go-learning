@@ -107,7 +107,7 @@ func startAction(ctx *cli.Context) {
 					return
 				}
 				if loginMessage == nil {
-					log.Logger.Info("wrong message")
+					log.Logger.Info("nil message")
 					return
 				}
 
@@ -153,6 +153,7 @@ func MessageDelivery(client *Client) {
 		case proto.COMMUNICATION_TYPE_ClientSend:
 			{
 				logger.Info("get bytes from client", message.MessageClientSend.Content)
+				fmt.Println(messageFormatter(client.Name, message.MessageClientSend.Content))
 				messageReceive := &proto.MessageWarpper{
 					Type: proto.COMMUNICATION_TYPE_ClientReceived,
 					MessageClientReceived: &proto.MessageClientReceived{
@@ -229,7 +230,7 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 			return nil, nil, err
 		}
 		if count >= MESSAGE_MAX_LENGTH {
-			return nil, nil, errors.New("message too large")
+			return nil, nil, errors.New("message too big")
 		}
 		msg := MessageInterpreter(bytes[:count])
 		if msg.Type == proto.COMMUNICATION_TYPE_LoginRequest {
@@ -371,6 +372,10 @@ func LogoutFault(client *Client) error {
 	}
 	client.Connection.Write(bytes)
 	return nil
+}
+
+func messageFormatter(name, content string) string {
+	return fmt.Sprintf("[%s]: %s", name, content)
 }
 
 func Init() {

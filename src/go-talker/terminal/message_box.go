@@ -21,9 +21,11 @@ type MessageBox struct {
 
 func (self *MessageBox) AddMessage(message Message) {
 	//self.locker.Lock()
+	log.Logger.Info("add message !!!!!!!")
 	self.Messages = append(self.Messages, message)
 	//self.locker.Unlock()
 	self.InChan <- &message
+	log.Logger.Info("add message !!!!!!! over")
 }
 
 func NewMessageBox() *MessageBox {
@@ -32,6 +34,7 @@ func NewMessageBox() *MessageBox {
 		Messages:    []Message{},
 		Boxes:       make([]Box, 0),
 		MessageChan: make(chan *Message, 0),
+		InChan:      make(chan *Message, 0),
 	}
 }
 
@@ -54,7 +57,7 @@ func NewMessageList() *MessageBox {
 
 func (self *MessageBox) Buffer() *termui.Buffer {
 	log.Logger.Info("bbbbbbbbbbbbb", len(self.Messages))
-	//self.locker.Lock()
+	self.locker.Lock()
 	buf := self.Block.Buffer()
 	width := self.X - 4
 	y := self.Block.Y
@@ -67,13 +70,13 @@ func (self *MessageBox) Buffer() *termui.Buffer {
 			if len(fmtMessage) > width {
 				firstLine := fmtMessage[:width+1]
 				secondLine := fmtMessage[width+1:]
-				if len(secondLine) > 2*width-4 {
-					secondLine = secondLine[width:2*width-4] + "…"
+				if len(secondLine) > width-6 {
+					secondLine = secondLine[:width-6] + "…"
 				}
 				buf.SetString(2, 1+2*_i, firstLine, 35, 47)
 				buf.SetString(4, 2+2*_i, secondLine, 35, 47)
 			} else {
-				buf.SetString(2, 2+2*_i, fmtMessage, 35, 47)
+				buf.SetString(2, 1+2*_i, fmtMessage, 35, 47)
 			}
 		}
 	} else {
@@ -82,17 +85,17 @@ func (self *MessageBox) Buffer() *termui.Buffer {
 			if len(fmtMessage) > width {
 				firstLine := fmtMessage[:width+1]
 				secondLine := fmtMessage[width+1:]
-				if len(secondLine) > 2*width-4 {
-					secondLine = secondLine[width:2*width-4] + "…"
+				if len(secondLine) > width-6 {
+					secondLine = secondLine[:width-6] + "…"
 				}
 				buf.SetString(2, 1+2*_i, firstLine, 35, 47)
 				buf.SetString(4, 2+2*_i, secondLine, 35, 47)
 			} else {
-				buf.SetString(2, 2+2*_i, fmtMessage, 35, 47)
+				buf.SetString(2, 1+2*_i, fmtMessage, 35, 47)
 			}
 		}
 	}
-	//self.locker.Unlock()
+	self.locker.Unlock()
 	return buf
 }
 
