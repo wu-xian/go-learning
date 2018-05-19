@@ -13,6 +13,7 @@ enum COMMUNICATION_TYPE{
     ClientLogout =5;//其他客户端登出
     ClientReceived = 6;//客户端接收消息
     ClientSend = 7; //客户端发送消息
+    OnlineClients = 8;//当前在线客户端
 }
 
 //消息壳
@@ -26,6 +27,7 @@ message MessageWarpper{
     MessageClientLogout MessageClientLogout=7;//其他客户端登出
     MessageClientReceived MessageClientReceived=8;//客户端接收消息
     MessageClientSend MessageClientSend=9;//客户端发送消息
+    MessageOnlineClients MessageOnlineClients =10;//登陆时获取当前在线客户端
 }
 
 //客户端登入请求
@@ -37,6 +39,7 @@ message MessageLoginRequest{
 //客户端登入响应
 message MessageLoginResponse{
     bool Succeed = 1;
+    int32 Id =2 ;
 }
 
 //客户端登出请求
@@ -71,4 +74,10 @@ message MessageClientReceived{
 //客户端发送消息
 message MessageClientSend{
     string Content = 1;
+}
+
+//当前在线客户端 
+message MessageOnlineClients{
+    repeated int32 Ids =1;
+    repeated string Names =2;
 }

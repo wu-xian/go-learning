@@ -16,9 +16,6 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	if err := ui.Init(); err != nil {
 		panic(err)
 	}
-	defer ui.Close()
-	defer ui.Clear()
-
 	ui.Body.Cols = 12
 	ui.Body.Rows = 12
 
@@ -44,6 +41,9 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	})
 
 	go func() {
+		defer func() {
+			recover()
+		}()
 		for {
 			select {
 			case _ = <-clientList.InChan:
@@ -57,6 +57,7 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 					UILocker.Lock()
 					ui.Render(ui.Body)
 					UILocker.Unlock()
+					log.Logger.Info("client list out chan")
 				}
 			case _ = <-messageBox.InChan:
 				{
@@ -70,35 +71,58 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 
 	go func() {
 		for {
-			message := <-messageChan
-			log.Logger.Info("get message , type:", message.Type)
-			switch message.Type {
-			case proto.COMMUNICATION_TYPE_ClientLogin:
+			select {
+			case message := <-messageChan:
 				{
-					clientList.Add(&Client{
-						Id:   message.MessageClientLogin.Id,
-						Name: message.MessageClientLogin.Name,
-					})
-				}
-			case proto.COMMUNICATION_TYPE_ClientLogout:
-				{
-					clientList.Remove(&Client{
-						Id: message.MessageClientLogout.Id,
-					})
-				}
-			case proto.COMMUNICATION_TYPE_ClientReceived:
-				{
-					messageBox.AddMessage(Message{
-						Name:    message.MessageClientReceived.Name,
-						Content: message.MessageClientReceived.Content,
-					})
-				}
-			default:
-				{
-
-					log.Logger.Info("received:", message)
+					log.Logger.Info("get message , type:", message.Type)
+					switch message.Type {
+					case proto.COMMUNICATION_TYPE_ClientLogin:
+						{
+							clientList.Add(&Client{
+								Id:   message.MessageClientLogin.Id,
+								Name: message.MessageClientLogin.Name,
+							})
+							messageBox.AddMessage(Message{
+								Name:    message.MessageClientLogin.Name,
+								Content: "im login !  take a word~~ ",
+							})
+						}
+					case proto.COMMUNICATION_TYPE_ClientLogout:
+						{
+							clientList.Remove(&Client{
+								Id: message.MessageClientLogout.Id,
+							})
+							messageBox.AddMessage(Message{
+								Name:    message.MessageClientLogout.Name,
+								Content: "im logout !  bye bye~~ ",
+							})
+						}
+					case proto.COMMUNICATION_TYPE_ClientReceived:
+						{
+							messageBox.AddMessage(Message{
+								Name:    message.MessageClientReceived.Name,
+								Content: message.MessageClientReceived.Content,
+							})
+						}
+					case proto.COMMUNICATION_TYPE_OnlineClients:
+						{
+							ids := message.MessageOnlineClients.Ids
+							names := message.MessageOnlineClients.Names
+							for i := 0; i < len(ids); i++ {
+								clientList.Add(&Client{
+									Id:   ids[i],
+									Name: names[i],
+								})
+							}
+						}
+					default:
+						{
+							log.Logger.Info("received:", message)
+						}
+					}
 				}
 			}
+			log.Logger.Info("end of select")
 		}
 	}()
 
@@ -117,4 +141,5 @@ func LoopClientUI(messageChan chan *proto.MessageWarpper, messagePublishChan cha
 	fmt.Println("application stopping")
 	UILocker.Lock()
 	UILocker.Unlock()
+	ui.Close()
 }

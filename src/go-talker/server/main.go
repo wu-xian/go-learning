@@ -137,17 +137,16 @@ func MessageDelivery(client *Client) {
 	for {
 		client.Connection.SetDeadline(time.Now().Add(5 * time.Minute))
 		count, err := client.Connection.Read(bytes)
-		log.Logger.Info("get bytes from client ", bytes[:count])
 		if err != nil {
 			logger.Info("read bytes :", err)
 			pool.Remove(client)
 			return
 		}
 		message := MessageInterpreter(bytes[:count])
+		log.Logger.Info("Delivery message from client ", message)
 		switch message.Type {
 		case proto.COMMUNICATION_TYPE_LogoutRequest:
 			{
-				Logout(client)
 				return
 			}
 		case proto.COMMUNICATION_TYPE_ClientSend:
@@ -271,6 +270,7 @@ func Login(conn *net.TCPConn) (client *Client, message *proto.MessageWarpper, er
 	}
 	pool.Insert(client)
 	LoginSucceed(client)
+	OnlineClients(client)
 	time.Sleep(100 * time.Millisecond)
 	BroadcastClientLogin(client)
 	log.Logger.Info("client login :", client.Address, client.Name, client.Id)
@@ -296,6 +296,7 @@ func LoginSucceed(client *Client) error {
 		Type: proto.COMMUNICATION_TYPE_LoginResponse,
 		MessageLoginResponse: &proto.MessageLoginResponse{
 			Succeed: true,
+			Id:      client.Id,
 		},
 	}
 	bytes, err := loginResponseMessage.MessageMarshal()
@@ -322,10 +323,36 @@ func LoginFault(client *Client) error {
 	return nil
 }
 
+func OnlineClients(client *Client) {
+	pool.Locker.Lock()
+	clientCount := len(pool.Clients)
+	ids := make([]int32, clientCount-1)
+	names := make([]string, clientCount-1)
+	for i := 0; i < clientCount; i++ {
+		if pool.Clients[i].Id == client.Id {
+			continue
+		}
+		ids = append(ids, pool.Clients[i].Id)
+		names = append(names, pool.Clients[i].Name)
+	}
+	pool.Locker.Unlock()
+
+	warpper := &proto.MessageWarpper{
+		Type: proto.COMMUNICATION_TYPE_OnlineClients,
+		MessageOnlineClients: &proto.MessageOnlineClients{
+			Ids:   ids,
+			Names: names,
+		},
+	}
+	bytes, _ := warpper.MessageMarshal()
+	client.Connection.Write(bytes)
+}
+
 //Logout 用户登出
 func Logout(client *Client) {
 	BroadcastClientLogout(client)
 	LogoutSucceed(client)
+	fmt.Println("client logout", client.Id, client.Address.String(), client.Name)
 	pool.Remove(client)
 }
 

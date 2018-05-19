@@ -24,9 +24,13 @@ var (
 	Key                string
 	connection         *net.TCPConn
 	messageChan        chan *proto.MessageWarpper = make(chan *proto.MessageWarpper, 0)
+	shouldStopChan     chan struct{}              = make(chan struct{}, 1)
 	messagePublishChan chan string                = make(chan string, 0)
 	stopIt             chan os.Signal             = make(chan os.Signal, 1)
+	ClientId           int32
 )
+
+type EmptyStruct struct{}
 
 const MESSAGE_MAX_LENGTH = 2048
 
@@ -62,16 +66,16 @@ func main() {
 	}()
 
 	terminal.LoopClientUI(messageChan, messagePublishChan)
-	_ = <-stopIt
 
+	shouldStopChan <- EmptyStruct{}
 	_ = Logout(connection)
-	connection.CloseRead()
+	//connection.CloseRead()
 	fmt.Println("application stopped")
 }
 
 func MessageReceiver(conn *net.TCPConn) {
+	bytes := make([]byte, MESSAGE_MAX_LENGTH)
 	for {
-		bytes := make([]byte, MESSAGE_MAX_LENGTH)
 		count, err := conn.Read(bytes)
 		//conn.CloseRead()
 		if err != nil {
@@ -84,6 +88,9 @@ func MessageReceiver(conn *net.TCPConn) {
 			return
 		}
 		log.Logger.Info("messagereceiver get:", message)
+		if message == nil {
+			continue
+		}
 		switch message.Type {
 		case proto.COMMUNICATION_TYPE_ClientReceived:
 			{
@@ -94,6 +101,12 @@ func MessageReceiver(conn *net.TCPConn) {
 				messageChan <- message
 			}
 		case proto.COMMUNICATION_TYPE_ClientLogout:
+			{
+				if message.MessageClientLogout.Id != ClientId {
+					messageChan <- message
+				}
+			}
+		case proto.COMMUNICATION_TYPE_OnlineClients:
 			{
 				messageChan <- message
 			}
@@ -107,26 +120,35 @@ func MessageReceiver(conn *net.TCPConn) {
 
 func MessagePublisher(conn *net.TCPConn) {
 	for {
-		content := <-messagePublishChan
-		log.Logger.Info("send content", content)
-		//content := ""
-		//fmt.Scanln(&content)
-		message := proto.MessageWarpper{
-			Type: proto.COMMUNICATION_TYPE_ClientSend,
-			MessageClientSend: &proto.MessageClientSend{
-				Content: content,
-			},
-		}
-		bytess, err := message.MessageMarshal()
-		log.Logger.Info("send bytes ", bytess)
-		if err != nil {
-			return
-		}
-		_, err = conn.Write(bytess)
-		//err = conn.CloseWrite()
-		if err != nil {
-			fmt.Println(err)
-			return
+		select {
+		case content := <-messagePublishChan:
+			{
+
+				log.Logger.Info("send content", content)
+				//content := ""
+				//fmt.Scanln(&content)
+				message := proto.MessageWarpper{
+					Type: proto.COMMUNICATION_TYPE_ClientSend,
+					MessageClientSend: &proto.MessageClientSend{
+						Content: content,
+					},
+				}
+				bytess, err := message.MessageMarshal()
+				log.Logger.Info("send bytes ", bytess)
+				if err != nil {
+					return
+				}
+				_, err = conn.Write(bytess)
+				//err = conn.CloseWrite()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+		case _ = <-shouldStopChan:
+			{
+				return
+			}
 		}
 	}
 }
@@ -136,7 +158,7 @@ func MessageInterpreter(bytes []byte) (msg *proto.MessageWarpper) {
 	warpper := &proto.MessageWarpper{}
 	err := warpper.MessageUnmarshal(bytes)
 	if err != nil {
-		log.Logger.Info("", err)
+		log.Logger.Info("err warpper:", err)
 		return nil
 	}
 	return warpper
@@ -153,7 +175,7 @@ func Login(conn *net.TCPConn) error {
 	}
 	bytes, err := loginMessage.MessageMarshal()
 	if err != nil {
-		log.Logger.Info("", err)
+		log.Logger.Info("err login message", err)
 		return err
 	}
 	for i := 0; i < 3; i++ {
@@ -166,12 +188,11 @@ func Login(conn *net.TCPConn) error {
 		readBytes := make([]byte, 20)
 		count, err = conn.Read(readBytes)
 		msg := MessageInterpreter(readBytes[:count])
-		log.Logger.Info("", readBytes[:count])
 		if msg.Type == proto.COMMUNICATION_TYPE_LoginResponse &&
 			msg.MessageLoginResponse.Succeed {
+			ClientId = msg.MessageLoginResponse.Id
 			break
 		}
-		log.Logger.Info("", msg)
 		if i == 2 {
 			return errors.New("wrong login message")
 		}
@@ -192,28 +213,22 @@ func Logout(conn *net.TCPConn) error {
 		log.Logger.Info("", err)
 		return err
 	}
-	for i := 0; i < 3; i++ {
-		count, err := conn.Write(bytes)
-		if err != nil {
-			return errors.New("logout")
-		}
-		if count >= MESSAGE_MAX_LENGTH {
-			return errors.New("message too large")
-		}
+	conn.Write(bytes)
+	//count, err := conn.Write(bytes)
+	// if err != nil {
+	// 	return errors.New("logout")
+	// }
+	// if count >= MESSAGE_MAX_LENGTH {
+	// 	return errors.New("message too big")
+	// }
 
-		readBytes := make([]byte, 0)
-		count, err = conn.Read(readBytes)
-		msg := MessageInterpreter(readBytes[:count])
-		if msg.Type == proto.COMMUNICATION_TYPE_LogoutResponse &&
-			msg.MessageLogoutResponse.Succeed {
-			break
-		}
-		if i == 2 {
-			return errors.New("wrong logout message")
-		}
-		time.Sleep(time.Second * 3)
-		continue
-	}
+	// readBytes := make([]byte, 0)
+	// count, err = conn.Read(readBytes)
+	// msg := MessageInterpreter(readBytes[:count])
+	// if msg.Type == proto.COMMUNICATION_TYPE_LogoutResponse &&
+	// 	msg.MessageLogoutResponse.Succeed {
+	// 	return nil
+	// }
 
 	return nil
 }

@@ -53,7 +53,7 @@ func (self *InputBox) Buffer() *termui.Buffer {
 		texts = append(texts, lost)
 
 		for i, v := range texts {
-			if i < y-2 {
+			if i < y {
 				buf.SetString(2, 2+i, v, 35, 47)
 			}
 		}

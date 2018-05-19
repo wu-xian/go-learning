@@ -35,7 +35,9 @@ func (self *ClientList) Remove(client *Client) {
 			break
 		}
 	}
-	self.clients = append(self.clients[:index], self.clients[index+1:]...)
+	if index != -1 {
+		self.clients = append(self.clients[:index], self.clients[index+1:]...)
+	}
 	self.clientLocker.Unlock()
 	self.OutChan <- client
 }
