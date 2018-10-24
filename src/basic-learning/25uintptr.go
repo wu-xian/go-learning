@@ -10,4 +10,6 @@ func main() {
 	fmt.Println(^uintptr(0))
 	fmt.Println(^uintptr(1))
 	fmt.Println(uint(0x01 << 63))
+	fmt.Println(uint(0xffffffffffffffff))
+	fmt.Println(uint(0xffffffff))
 }
